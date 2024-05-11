@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 void main() async {
   // Load Environment Variables
@@ -34,6 +35,17 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  late GoogleMapController mapController;
+
+  final LatLng _center = const LatLng(43.281631, -0.802300);
+
+  void _onMapCreated(GoogleMapController controller)
+  {
+    setState(() {
+      mapController = controller;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,6 +54,7 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
+            Container(height: 600, margin: EdgeInsets.all(10), child: GoogleMap(onMapCreated: _onMapCreated, initialCameraPosition: CameraPosition(target: _center, zoom: 11.0,),)),
             StartLocation(),
             EndLocation(),
           ],
@@ -61,7 +74,7 @@ class StartLocation extends StatelessWidget {
     return Container(
       margin: EdgeInsets.all(10),
       child: TextField(
-        obscureText: true,
+        obscureText: false,
         decoration: InputDecoration(
           border: OutlineInputBorder(),
           labelText: 'Origin',
@@ -81,7 +94,7 @@ class EndLocation extends StatelessWidget {
     return Container(
       margin: EdgeInsets.all(10),
       child: TextField(
-        obscureText: true,
+        obscureText: false,
         decoration: InputDecoration(
           border: OutlineInputBorder(),
           labelText: 'Destination',
