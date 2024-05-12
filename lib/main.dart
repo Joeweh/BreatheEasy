@@ -58,6 +58,9 @@ class _DirectionPageState extends State<DirectionPage> {
   final LatLng _center = const LatLng(43.281631, -0.802300);
   final Set<Marker> _markers = {};
 
+  String startQuery = "";
+  String endQuery = "";
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -66,8 +69,8 @@ class _DirectionPageState extends State<DirectionPage> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           googleMapWidget(),
-          startLocationBar(),
-          endLocationbar(),
+          StartLocationBar(),
+          EndLocationBar(),
         ],
       ),
     );
@@ -94,31 +97,77 @@ class _DirectionPageState extends State<DirectionPage> {
       _markers.add(Marker(markerId: MarkerId(markerId), position: l,)); 
     });
   }
+}
+
+
+class StartLocationBar extends StatefulWidget {
+  const StartLocationBar({
+    super.key,
+  });
+
+  @override
+  State<StartLocationBar> createState() => _StartLocationBarState();
+}
+
+class _StartLocationBarState extends State<StartLocationBar> {
+  
+  @override
+  Widget build(BuildContext context) {
+    return startLocationBar();
+  }
 
   Widget startLocationBar()
   {
     return Container(
       margin: const EdgeInsets.all(10),
-      child: const TextField(
+      child: TextField(
         obscureText: false,
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
           border: OutlineInputBorder(),
           labelText: 'Origin',
         ),
+        onChanged: (value) {
+          setState(() {
+            
+          });
+        },
       ),
     );
   }
+}
 
-  Widget endLocationbar()
+
+class EndLocationBar extends StatefulWidget {
+  const EndLocationBar({
+    super.key,
+  });
+
+  @override
+  State<EndLocationBar> createState() => _EndLocationBarState();
+}
+
+class _EndLocationBarState extends State<EndLocationBar> {
+  
+  @override
+  Widget build(BuildContext context) {
+    return endLocationBar();
+  }
+
+  Widget endLocationBar()
   {
     return Container(
       margin: const EdgeInsets.all(10),
-      child: const TextField(
+      child: TextField(
         obscureText: false,
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
           border: OutlineInputBorder(),
           labelText: 'Destination',
         ),
+        onChanged: (value) {
+          setState(() {
+            
+          });
+        },
       ),
     );
   }
