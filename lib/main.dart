@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart' as places;
 
 void main() async {
   // Load Environment Variables
@@ -39,7 +40,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) 
   {
     return const Scaffold(
-      body: DirectionPage()
+      body: SearchBarPageState() // Change to Direction Page if you want to see the page with the maps on it
     );
   }
 }
@@ -55,19 +56,36 @@ class DirectionPage extends StatefulWidget {
 
 class _DirectionPageState extends State<DirectionPage> {
   late GoogleMapController mapController;
-  final LatLng _center = const LatLng(43.281631, -0.802300);
   final Set<Marker> _markers = {};
+
+  String startQuery = "";
+  String endQuery = "";
+
+  final LatLng _center = const LatLng(43.281631, -0.802300);
+
+  void setStartQuery(String s)
+  {
+    startQuery = s;
+  }
+
+  void setEndQuery(String s)
+  {
+    endQuery = s;
+  }
 
   @override
   Widget build(BuildContext context) {
+    LocationBar startLocationBar = LocationBar(callback: setStartQuery,);
+    LocationBar endLocationBar = LocationBar(callback: setEndQuery,);
+
     return Container(
       margin: const EdgeInsets.all(10),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           googleMapWidget(),
-          startLocationBar(),
-          endLocationbar(),
+          startLocationBar,
+          endLocationBar,
         ],
       ),
     );
@@ -94,32 +112,112 @@ class _DirectionPageState extends State<DirectionPage> {
       _markers.add(Marker(markerId: MarkerId(markerId), position: l,)); 
     });
   }
+}
 
-  Widget startLocationBar()
+
+class LocationBar extends StatelessWidget {
+  final ValueChanged<String> callback;
+
+  const LocationBar({super.key, required this.callback});
+  
+  @override
+  Widget build(BuildContext context) {
+    return locationBar();
+  }
+
+  Widget locationBar()
   {
     return Container(
       margin: const EdgeInsets.all(10),
-      child: const TextField(
+      child: TextField(
         obscureText: false,
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
           border: OutlineInputBorder(),
           labelText: 'Origin',
         ),
+        onChanged: (value)
+        {
+          callback(value);
+        },
+      ),
+    );
+  }
+}
+
+
+class SearchBarPageState extends StatefulWidget {
+  const SearchBarPageState({super.key});
+
+  @override
+  State<SearchBarPageState> createState() => _SearchBarPageState();
+}
+
+class _SearchBarPageState extends State<SearchBarPageState> {
+  Map<String, String> httpAutocompletes = {};
+  Map<ElevatedButton, Map<String, String>> autoList = {};
+
+  late String selected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.all(10),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          LocationBar(callback: fetchPlacesAutcomplete,),
+          placesAutoComplete(),
+        ],
       ),
     );
   }
 
-  Widget endLocationbar()
+  Container placesAutoComplete() // Does not work yet
   {
+    List<String> locs = httpAutocompletes.entries.map((entry) => entry.key).toList();
+
     return Container(
       margin: const EdgeInsets.all(10),
-      child: const TextField(
-        obscureText: false,
-        decoration: InputDecoration(
-          border: OutlineInputBorder(),
-          labelText: 'Destination',
-        ),
-      ),
+      child: Column
+      (
+        children: [
+          for (String element in locs)
+            Container(margin: const EdgeInsets.all(10), child: ElevatedButton(onPressed: () {selected = element; print(selected);}, child: Text(element),))
+        ],
+      )
     );
+  }
+
+// crossAxisAlignment: CrossAxisAlignment.start,
+//         children: [
+//           for (var entry in httpAutocompletes.entries)
+//             Text(entry.key),
+//         ],
+
+
+  void fetchPlacesAutcomplete(String query) async
+  {
+    places.LatLng l = const places.LatLng(lat: 43.281631, lng: -0.802300, ); // Temp constant lat long coordinates
+    places.LatLngBounds bounds = places.LatLngBounds(
+      southwest: places.LatLng(lat: l.lat - 1, lng: l.lng - 1),
+      northeast: places.LatLng(lat: l.lat + 1, lng: l.lng + 1)
+    );
+
+    var locations = places.FlutterGooglePlacesSdk(dotenv.env['MAPS_API_KEY']!);
+    var predictions = await locations.findAutocompletePredictions(query, origin: l, locationBias: bounds);
+
+    Map<String, String> m = {};
+
+    predictions.predictions.forEach((element) {m[element.primaryText] = element.placeId;});
+    
+    if (query == "")
+    {
+      m = {};
+    }
+
+    setState(() {
+      httpAutocompletes = m;
+    });
   }
 }
