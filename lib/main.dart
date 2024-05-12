@@ -38,6 +38,7 @@ class _MyHomePageState extends State<MyHomePage> {
   late GoogleMapController mapController;
 
   final LatLng _center = const LatLng(43.281631, -0.802300);
+  final Set<Marker> _markers = {};
 
   void _onMapCreated(GoogleMapController controller)
   {
@@ -46,15 +47,25 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  void _addMarker(LatLng l, String markerId)
+  {
+    setState(() {
+      _markers.add(Marker(markerId: MarkerId(markerId), position: l,)); 
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    _addMarker(const LatLng(43.3, -0.8), "Test Marker 1");
+    _addMarker(const LatLng(43.281631, -0.802300), "Test Marker 2");
+
     return Scaffold(
       body: Container(
         margin: EdgeInsets.all(10),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            Container(height: 600, margin: EdgeInsets.all(10), child: GoogleMap(onMapCreated: _onMapCreated, initialCameraPosition: CameraPosition(target: _center, zoom: 11.0,),)),
+            Container(height: 600, margin: EdgeInsets.all(10), child: GoogleMap(onMapCreated: _onMapCreated, initialCameraPosition: CameraPosition(target: _center, zoom: 11.0,), markers: _markers,)),
             StartLocation(),
             EndLocation(),
           ],
