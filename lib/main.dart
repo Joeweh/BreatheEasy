@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:http/http.dart' as http;
+
 void main() async {
   // Load Environment Variables
   await dotenv.load(fileName: '.env');
@@ -41,7 +43,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) 
   {
     return const Scaffold(
-      body: SearchBarPageState() // Change to Direction Page if you want to see the page with the maps on it
+      body: DirectionPage() // Change to Direction Page if you want to see the page with the maps on it
     );
   }
 }
@@ -58,7 +60,10 @@ class DirectionPage extends StatefulWidget {
 class _DirectionPageState extends State<DirectionPage> {
   late GoogleMapController mapController;
   final Set<Marker> _markers = {};
-
+  Map<PolylineId, Polyline> _polylines = {};
+  PolylinePoints polylinePoints = PolylinePoints();
+  List<LatLng> polylineCoordinates = [];
+  var api_key = (dotenv.env['MAPS_API_KEY']).toString();
   String startQuery = "";
   String endQuery = "";
 
@@ -92,12 +97,16 @@ class _DirectionPageState extends State<DirectionPage> {
     );
   }
 
+  List<LatLng> latLen = [LatLng(43.3, -0.8), LatLng(43.281631, -0.802300)];
+  List<Marker> marks = [Marker(markerId: MarkerId('Test1'), position: LatLng(43.3, -0.8)), 
+  Marker(markerId: MarkerId('Test2'), position: LatLng(43.281631, -0.802300))];
+  
   Widget googleMapWidget()
   {
     _addMarker(const LatLng(43.3, -0.8), "Test Marker 1");
     _addMarker(const LatLng(43.281631, -0.802300), "Test Marker 2");
-
-    return Container(height: 600, margin: const EdgeInsets.all(10), child: GoogleMap(onMapCreated: _onMapCreated, initialCameraPosition: CameraPosition(target: _center, zoom: 11.0,), markers: _markers,));
+    getDirections(marks, setState);
+    return Container(height: 600, margin: const EdgeInsets.all(10), child: GoogleMap(onMapCreated: _onMapCreated, initialCameraPosition: CameraPosition(target: _center, zoom: 11.0,), markers: _markers, polylines: Set<Polyline>.of(_polylines.values)));
   }
 
   void _onMapCreated(GoogleMapController controller)
@@ -113,8 +122,40 @@ class _DirectionPageState extends State<DirectionPage> {
       _markers.add(Marker(markerId: MarkerId(markerId), position: l,)); 
     });
   }
-}
 
+  getDirections(List<Marker> markers, newSetState) async {
+    List<LatLng> polylineCoordinates = [];
+    List<PolylineWayPoint> polylineWayPoints = [];
+    for (var i =0; i<markers.length; i++){
+      polylineWayPoints.add(PolylineWayPoint(location:
+      "${markers[i].position.latitude.toString()},${markers[i].position.longitude.toString()}", stopOver: true));
+    }
+
+    PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(api_key, PointLatLng(markers.first.position.latitude, markers.first.position.longitude), PointLatLng(markers.last.position.latitude, markers.last.position.longitude), travelMode: TravelMode.driving, wayPoints: polylineWayPoints);
+
+    if(result.points.isNotEmpty){
+      result.points.forEach((PointLatLng point){
+        polylineCoordinates.add(LatLng(point.latitude, point.longitude));
+      });
+    
+    } else {
+      print(result.errorMessage);
+    }
+
+    newSetState(() {});
+
+    addPolyLine(polylineCoordinates, newSetState);
+  }
+
+  addPolyLine(List<LatLng> polylineCoordinates, newSetState){
+    PolylineId id = PolylineId("Poly");
+    Polyline polyline = Polyline(polylineId: id, color: Colors.blue, points: polylineCoordinates);
+    _polylines[id] = polyline;
+    newSetState((){});
+  }
+  
+  
+}
 
 class LocationBar extends StatelessWidget {
   final ValueChanged<String> callback;
