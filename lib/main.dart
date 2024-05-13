@@ -37,11 +37,12 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  var selectedIndex = 0;
   @override
   Widget build(BuildContext context) 
   {
     return const Scaffold(
-      body: SearchBarPageState() // Change to Direction Page if you want to see the page with the maps on it
+      body: DirectionPage() // Change to Direction Page if you want to see the page with the maps on it
     );
   }
 }
@@ -76,8 +77,6 @@ class _DirectionPageState extends State<DirectionPage> {
 
   @override
   Widget build(BuildContext context) {
-    LocationBar startLocationBar = LocationBar(callback: setStartQuery,);
-    LocationBar endLocationBar = LocationBar(callback: setEndQuery,);
 
     return Container(
       margin: const EdgeInsets.all(10),
@@ -85,8 +84,46 @@ class _DirectionPageState extends State<DirectionPage> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           googleMapWidget(),
-          startLocationBar,
-          endLocationBar,
+          const SizedBox(height: 20),
+          TextField(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => SearchBarPageState(),
+                    fullscreenDialog: true),
+              );
+            },
+            autofocus: false,
+            showCursor: false,
+            decoration: InputDecoration(
+                hintText: 'Origin',
+                hintStyle: const TextStyle(
+                    fontWeight: FontWeight.w500, fontSize: 24),
+                filled: true,
+                fillColor: Colors.grey[200],
+                border: InputBorder.none),
+          ),
+          const SizedBox(height: 20),
+          TextField(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => SearchBarPageState(),
+                    fullscreenDialog: true),
+              );
+            },
+            autofocus: false,
+            showCursor: false,
+            decoration: InputDecoration(
+                hintText: 'Destination',
+                hintStyle: const TextStyle(
+                    fontWeight: FontWeight.w500, fontSize: 24),
+                filled: true,
+                fillColor: Colors.grey[200],
+                border: InputBorder.none),
+          ),
         ],
       ),
     );
@@ -134,7 +171,7 @@ class LocationBar extends StatelessWidget {
         obscureText: false,
         decoration: const InputDecoration(
           border: OutlineInputBorder(),
-          labelText: 'Origin',
+          labelText: 'Location',
         ),
         onChanged: (value)
         {
@@ -166,33 +203,36 @@ class _SearchBarPageState extends State<SearchBarPageState> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(10),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          LocationBar(callback: setTextInBar,),
-        ],
+    return Scaffold(
+      appBar: AppBar(),
+      body: Container(
+        margin: const EdgeInsets.all(10),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            LocationBar(callback: setTextInBar,),
+            // placesAutoComplete(),
+          ],
+        ),
       ),
     );
   }
 
-  Container placesAutoComplete() // Does not work yet
+  Container placesAutoComplete()
   {
+    fetchPlacesAutcomplete(textInBar, const LatLng(43.281631, -0.802300));
     return Container(
       margin: const EdgeInsets.all(10),
-      child: ListView(
+      child: Column(
         children: [
           for (var entry in httpAutocompletes.entries)
-            ListTile(
-              leading: const Icon(Icons.favorite),
-            )
+            Text(entry.key),
         ],
       )
     );
   }
 
-  void fetchPlacesAutcomplete(String query, LatLng l) async // This method doesn't work completely yet, we need to set a timer to make the api requests slow down
+  Future<int> fetchPlacesAutcomplete(String query, LatLng l) async // This method doesn't work completely yet, we need to set a timer to make the api requests slow down
   {
     final uri = Uri.parse("https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$query&location=${l.latitude}%2C${l.longitude}&radius=500&key=${dotenv.env['MAPS_API_KEY']!}");
     final response = await http.get(uri);
@@ -211,5 +251,7 @@ class _SearchBarPageState extends State<SearchBarPageState> {
     {
       throw Exception('Failed to get places autocorrect');
     }
+
+    return 0;
   }
 }
