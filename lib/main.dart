@@ -3,7 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart' as places;
+
 void main() async {
   // Load Environment Variables
   await dotenv.load(fileName: '.env');
@@ -154,15 +155,10 @@ class SearchBarPageState extends StatefulWidget {
 }
 
 class _SearchBarPageState extends State<SearchBarPageState> {
-  String textInBar = "";
   Map<String, String> httpAutocompletes = {};
+  Map<ElevatedButton, Map<String, String>> autoList = {};
 
-  void setTextInBar(String s)
-  {
-    setState(() {
-      textInBar = s;
-    });
-  }
+  late String selected;
 
   @override
   Widget build(BuildContext context) {
@@ -170,8 +166,10 @@ class _SearchBarPageState extends State<SearchBarPageState> {
       margin: const EdgeInsets.all(10),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          LocationBar(callback: setTextInBar,),
+          LocationBar(callback: fetchPlacesAutcomplete,),
+          placesAutoComplete(),
         ],
       ),
     );
@@ -179,37 +177,49 @@ class _SearchBarPageState extends State<SearchBarPageState> {
 
   Container placesAutoComplete() // Does not work yet
   {
+    List<String> locs = httpAutocompletes.entries.map((entry) => entry.key).toList();
+
     return Container(
       margin: const EdgeInsets.all(10),
-      child: ListView(
+      child: Column
+      (
         children: [
-          for (var entry in httpAutocompletes.entries)
-            ListTile(
-              leading: const Icon(Icons.favorite),
-            )
+          for (String element in locs)
+            Container(margin: const EdgeInsets.all(10), child: ElevatedButton(onPressed: () {selected = element; print(selected);}, child: Text(element),))
         ],
       )
     );
   }
 
-  void fetchPlacesAutcomplete(String query, LatLng l) async // This method doesn't work completely yet, we need to set a timer to make the api requests slow down
+// crossAxisAlignment: CrossAxisAlignment.start,
+//         children: [
+//           for (var entry in httpAutocompletes.entries)
+//             Text(entry.key),
+//         ],
+
+
+  void fetchPlacesAutcomplete(String query) async
   {
-    final uri = Uri.parse("https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$query&location=${l.latitude}%2C${l.longitude}&radius=500&key=${dotenv.env['MAPS_API_KEY']!}");
-    final response = await http.get(uri);
+    places.LatLng l = const places.LatLng(lat: 43.281631, lng: -0.802300, ); // Temp constant lat long coordinates
+    places.LatLngBounds bounds = places.LatLngBounds(
+      southwest: places.LatLng(lat: l.lat - 1, lng: l.lng - 1),
+      northeast: places.LatLng(lat: l.lat + 1, lng: l.lng + 1)
+    );
+
+    var locations = places.FlutterGooglePlacesSdk(dotenv.env['MAPS_API_KEY']!);
+    var predictions = await locations.findAutocompletePredictions(query, origin: l, locationBias: bounds);
+
     Map<String, String> m = {};
 
-    if (response.statusCode == 200)
+    predictions.predictions.forEach((element) {m[element.primaryText] = element.placeId;});
+    
+    if (query == "")
     {
-      final locations = jsonDecode(response.body);
-      locations['predictions'].forEach((value) => m[value['description']] = value['place_id']);
+      m = {};
+    }
 
-      setState(() {
-        httpAutocompletes = m;
-      });
-    }
-    else
-    {
-      throw Exception('Failed to get places autocorrect');
-    }
+    setState(() {
+      httpAutocompletes = m;
+    });
   }
 }
