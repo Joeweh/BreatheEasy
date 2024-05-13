@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -39,11 +37,12 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   var selectedIndex = 0;
+
   @override
   Widget build(BuildContext context) 
   {
     return const Scaffold(
-      body: DirectionPage() // Change to Direction Page if you want to see the page with the maps on it
+      body: DirectionPage()
     );
   }
 }
@@ -61,19 +60,23 @@ class _DirectionPageState extends State<DirectionPage> {
   late GoogleMapController mapController;
   final Set<Marker> _markers = {};
 
-  String startQuery = "";
-  String endQuery = "";
+  MapEntry<String, String> startQuery = MapEntry("", "");
+  MapEntry<String, String> endQuery = MapEntry("", "");
 
   final LatLng _center = const LatLng(43.281631, -0.802300);
 
-  void setStartQuery(String s)
+  void setStartQuery(MapEntry<String, String> s)
   {
-    startQuery = s;
+    setState(() {
+      startQuery = s;
+    });
   }
 
-  void setEndQuery(String s)
+  void setEndQuery(MapEntry<String, String> s)
   {
-    endQuery = s;
+    setState(() {
+      endQuery = s;
+    });
   }
 
   @override
@@ -91,7 +94,7 @@ class _DirectionPageState extends State<DirectionPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => const SearchBarPageState(),
+                    builder: (context) => SearchBarPageState(callback: setStartQuery,),
                     fullscreenDialog: true),
               );
             },
@@ -111,7 +114,7 @@ class _DirectionPageState extends State<DirectionPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => const SearchBarPageState(),
+                    builder: (context) => SearchBarPageState(callback: setEndQuery,),
                     fullscreenDialog: true),
               );
             },
@@ -184,7 +187,9 @@ class LocationBar extends StatelessWidget {
 
 
 class SearchBarPageState extends StatefulWidget {
-  const SearchBarPageState({super.key});
+  final Function(MapEntry<String, String>) callback;
+  
+  const SearchBarPageState({super.key, required this.callback});
 
   @override
   State<SearchBarPageState> createState() => _SearchBarPageState();
@@ -194,12 +199,18 @@ class _SearchBarPageState extends State<SearchBarPageState> {
   Map<String, String> httpAutocompletes = {};
   Map<ElevatedButton, Map<String, String>> autoList = {};
 
-  late String selected;
+  MapEntry<String, String> selected = MapEntry("", "");
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () {widget.callback(selected); Navigator.of(context).pop();},
+        ), 
+        centerTitle: true,
+      ),
       body: Container(
         margin: const EdgeInsets.all(10),
         child: Column(
@@ -224,18 +235,11 @@ class _SearchBarPageState extends State<SearchBarPageState> {
       (
         children: [
           for (String element in locs)
-            Container(margin: const EdgeInsets.all(10), child: ElevatedButton(onPressed: () {selected = element; print(selected);}, child: Text(element),))
+            Container(margin: const EdgeInsets.all(10), child: ElevatedButton(onPressed: () {selected = MapEntry(element, httpAutocompletes[element].toString());}, child: Text(element),))
         ],
       )
     );
   }
-
-// crossAxisAlignment: CrossAxisAlignment.start,
-//         children: [
-//           for (var entry in httpAutocompletes.entries)
-//             Text(entry.key),
-//         ],
-
 
   void fetchPlacesAutcomplete(String query) async
   {
