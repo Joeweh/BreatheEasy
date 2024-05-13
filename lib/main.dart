@@ -60,8 +60,8 @@ class _DirectionPageState extends State<DirectionPage> {
   late GoogleMapController mapController;
   final Set<Marker> _markers = {};
 
-  MapEntry<String, String> startQuery = MapEntry("", "");
-  MapEntry<String, String> endQuery = MapEntry("", "");
+  MapEntry<String, String> startQuery = MapEntry("Origin", "");
+  MapEntry<String, String> endQuery = MapEntry("Destination", "");
 
   final LatLng _center = const LatLng(43.281631, -0.802300);
 
@@ -89,48 +89,34 @@ class _DirectionPageState extends State<DirectionPage> {
         children: [
           googleMapWidget(),
           const SizedBox(height: 20),
-          TextField(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => SearchBarPageState(callback: setStartQuery,),
-                    fullscreenDialog: true),
-              );
-            },
-            autofocus: false,
-            showCursor: false,
-            decoration: InputDecoration(
-                hintText: 'Origin',
-                hintStyle: const TextStyle(
-                    fontWeight: FontWeight.w500, fontSize: 24),
-                filled: true,
-                fillColor: Colors.grey[200],
-                border: InputBorder.none),
-          ),
+          locationBar(context, startQuery, setStartQuery),
           const SizedBox(height: 20),
-          TextField(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => SearchBarPageState(callback: setEndQuery,),
-                    fullscreenDialog: true),
-              );
-            },
-            autofocus: false,
-            showCursor: false,
-            decoration: InputDecoration(
-                hintText: 'Destination',
-                hintStyle: const TextStyle(
-                    fontWeight: FontWeight.w500, fontSize: 24),
-                filled: true,
-                fillColor: Colors.grey[200],
-                border: InputBorder.none),
-          ),
+          locationBar(context, endQuery, setEndQuery)
         ],
       ),
     );
+  }
+
+  TextField locationBar(BuildContext context, MapEntry<String, String> location, Function(MapEntry<String, String>) m) {
+    return TextField(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => SearchBarPageState(callback: m,),
+                  fullscreenDialog: true),
+            );
+          },
+          autofocus: false,
+          showCursor: false,
+          decoration: InputDecoration(
+              hintText: location.key,
+              hintStyle: const TextStyle(
+                  fontWeight: FontWeight.w500, fontSize: 24),
+              filled: true,
+              fillColor: Colors.grey[200],
+              border: InputBorder.none),
+        );
   }
 
   Widget googleMapWidget()
