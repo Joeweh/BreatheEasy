@@ -91,7 +91,7 @@ class _DirectionPageState extends State<DirectionPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => SearchBarPageState(),
+                    builder: (context) => const SearchBarPageState(),
                     fullscreenDialog: true),
               );
             },
@@ -111,7 +111,7 @@ class _DirectionPageState extends State<DirectionPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => SearchBarPageState(),
+                    builder: (context) => const SearchBarPageState(),
                     fullscreenDialog: true),
               );
             },
@@ -191,15 +191,10 @@ class SearchBarPageState extends StatefulWidget {
 }
 
 class _SearchBarPageState extends State<SearchBarPageState> {
-  String textInBar = "";
   Map<String, String> httpAutocompletes = {};
+  Map<ElevatedButton, Map<String, String>> autoList = {};
 
-  void setTextInBar(String s)
-  {
-    setState(() {
-      textInBar = s;
-    });
-  }
+  late String selected;
 
   @override
   Widget build(BuildContext context) {
@@ -209,45 +204,12 @@ class _SearchBarPageState extends State<SearchBarPageState> {
         margin: const EdgeInsets.all(10),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            LocationBar(callback: setTextInBar,),
-            // placesAutoComplete(),
+            LocationBar(callback: fetchPlacesAutcomplete,),
+            placesAutoComplete(),
           ],
         ),
-        onChanged: (value)
-        {
-          callback(value);
-        },
-      ),
-    );
-  }
-}
-
-
-class SearchBarPageState extends StatefulWidget {
-  const SearchBarPageState({super.key});
-
-  @override
-  State<SearchBarPageState> createState() => _SearchBarPageState();
-}
-
-class _SearchBarPageState extends State<SearchBarPageState> {
-  Map<String, String> httpAutocompletes = {};
-  Map<ElevatedButton, Map<String, String>> autoList = {};
-
-  late String selected;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(10),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          LocationBar(callback: fetchPlacesAutcomplete,),
-          placesAutoComplete(),
-        ],
       ),
     );
   }
@@ -277,22 +239,24 @@ class _SearchBarPageState extends State<SearchBarPageState> {
 
   void fetchPlacesAutcomplete(String query) async
   {
-    places.LatLng l = const places.LatLng(lat: 43.281631, lng: -0.802300, ); // Temp constant lat long coordinates
-    places.LatLngBounds bounds = places.LatLngBounds(
-      southwest: places.LatLng(lat: l.lat - 1, lng: l.lng - 1),
-      northeast: places.LatLng(lat: l.lat + 1, lng: l.lng + 1)
-    );
-
-    var locations = places.FlutterGooglePlacesSdk(dotenv.env['MAPS_API_KEY']!);
-    var predictions = await locations.findAutocompletePredictions(query, origin: l, locationBias: bounds);
-
     Map<String, String> m = {};
-
-    predictions.predictions.forEach((element) {m[element.primaryText] = element.placeId;});
     
     if (query == "")
     {
       m = {};
+    }
+    else
+    {
+      places.LatLng l = const places.LatLng(lat: 43.281631, lng: -0.802300, ); // Temp constant lat long coordinates
+      places.LatLngBounds bounds = places.LatLngBounds(
+        southwest: places.LatLng(lat: l.lat - 1, lng: l.lng - 1),
+        northeast: places.LatLng(lat: l.lat + 1, lng: l.lng + 1)
+      );
+
+      var locations = places.FlutterGooglePlacesSdk(dotenv.env['MAPS_API_KEY']!);
+      var predictions = await locations.findAutocompletePredictions(query, origin: l, locationBias: bounds);
+
+      predictions.predictions.forEach((element) {m[element.primaryText] = element.placeId;});
     }
 
     setState(() {
