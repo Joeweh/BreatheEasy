@@ -38,11 +38,12 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  var selectedIndex = 0;
   @override
   Widget build(BuildContext context) 
   {
     return const Scaffold(
-      body: SearchBarPageState() // Change to Direction Page if you want to see the page with the maps on it
+      body: DirectionPage() // Change to Direction Page if you want to see the page with the maps on it
     );
   }
 }
@@ -77,8 +78,6 @@ class _DirectionPageState extends State<DirectionPage> {
 
   @override
   Widget build(BuildContext context) {
-    LocationBar startLocationBar = LocationBar(callback: setStartQuery,);
-    LocationBar endLocationBar = LocationBar(callback: setEndQuery,);
 
     return Container(
       margin: const EdgeInsets.all(10),
@@ -86,8 +85,46 @@ class _DirectionPageState extends State<DirectionPage> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           googleMapWidget(),
-          startLocationBar,
-          endLocationBar,
+          const SizedBox(height: 20),
+          TextField(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => SearchBarPageState(),
+                    fullscreenDialog: true),
+              );
+            },
+            autofocus: false,
+            showCursor: false,
+            decoration: InputDecoration(
+                hintText: 'Origin',
+                hintStyle: const TextStyle(
+                    fontWeight: FontWeight.w500, fontSize: 24),
+                filled: true,
+                fillColor: Colors.grey[200],
+                border: InputBorder.none),
+          ),
+          const SizedBox(height: 20),
+          TextField(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => SearchBarPageState(),
+                    fullscreenDialog: true),
+              );
+            },
+            autofocus: false,
+            showCursor: false,
+            decoration: InputDecoration(
+                hintText: 'Destination',
+                hintStyle: const TextStyle(
+                    fontWeight: FontWeight.w500, fontSize: 24),
+                filled: true,
+                fillColor: Colors.grey[200],
+                border: InputBorder.none),
+          ),
         ],
       ),
     );
@@ -119,7 +156,6 @@ class _DirectionPageState extends State<DirectionPage> {
 
 class LocationBar extends StatelessWidget {
   final ValueChanged<String> callback;
-
   const LocationBar({super.key, required this.callback});
   
   @override
@@ -135,7 +171,48 @@ class LocationBar extends StatelessWidget {
         obscureText: false,
         decoration: const InputDecoration(
           border: OutlineInputBorder(),
-          labelText: 'Origin',
+          labelText: 'Location',
+        ),
+        onChanged: (value)
+        {
+          callback(value);
+        },
+      ),
+    );
+  }
+}
+
+
+class SearchBarPageState extends StatefulWidget {
+  const SearchBarPageState({super.key});
+
+  @override
+  State<SearchBarPageState> createState() => _SearchBarPageState();
+}
+
+class _SearchBarPageState extends State<SearchBarPageState> {
+  String textInBar = "";
+  Map<String, String> httpAutocompletes = {};
+
+  void setTextInBar(String s)
+  {
+    setState(() {
+      textInBar = s;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(),
+      body: Container(
+        margin: const EdgeInsets.all(10),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            LocationBar(callback: setTextInBar,),
+            // placesAutoComplete(),
+          ],
         ),
         onChanged: (value)
         {
