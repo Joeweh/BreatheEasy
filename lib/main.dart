@@ -3,6 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart' as places;
 
+
 void main() async {
   // Load Environment Variables
   await dotenv.load(fileName: '.env');
@@ -89,15 +90,15 @@ class _DirectionPageState extends State<DirectionPage> {
         children: [
           googleMapWidget(),
           const SizedBox(height: 20),
-          locationBar(context, startQuery, setStartQuery),
+          location(context, startQuery, setStartQuery),
           const SizedBox(height: 20),
-          locationBar(context, endQuery, setEndQuery)
+          location(context, endQuery, setEndQuery)
         ],
       ),
     );
   }
 
-  TextField locationBar(BuildContext context, MapEntry<String, String> location, Function(MapEntry<String, String>) m) {
+  TextField location(BuildContext context, MapEntry<String, String> location, Function(MapEntry<String, String>) m) {
     return TextField(
           onTap: () {
             Navigator.push(
@@ -143,10 +144,23 @@ class _DirectionPageState extends State<DirectionPage> {
 }
 
 
-class LocationBar extends StatelessWidget {
+class LocationBar extends StatefulWidget {
   final ValueChanged<String> callback;
-  const LocationBar({super.key, required this.callback});
+  LocationBar({key, required this.callback});
   
+  @override
+  void initState() {
+
+  }
+
+  @override
+  State<LocationBar> createState() => LocationBarState(callback: callback);
+}
+
+class LocationBarState extends State<LocationBar> {
+  final ValueChanged<String> callback;
+  LocationBarState({key, required this.callback});
+
   @override
   Widget build(BuildContext context) {
     return locationBar();
@@ -171,7 +185,6 @@ class LocationBar extends StatelessWidget {
   }
 }
 
-
 class SearchBarPageState extends StatefulWidget {
   final Function(MapEntry<String, String>) callback;
   
@@ -193,7 +206,7 @@ class _SearchBarPageState extends State<SearchBarPageState> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {widget.callback(selected); Navigator.of(context).pop();},
+          onPressed: () {widget.callback(MapEntry("","")); Navigator.of(context).pop();},
         ), 
         centerTitle: true,
       ),
@@ -221,7 +234,14 @@ class _SearchBarPageState extends State<SearchBarPageState> {
       (
         children: [
           for (String element in locs)
-            Container(margin: const EdgeInsets.all(10), child: ElevatedButton(onPressed: () {selected = MapEntry(element, httpAutocompletes[element].toString());}, child: Text(element),))
+            Container(
+              margin: const EdgeInsets.all(10), 
+              child: ElevatedButton(
+                onPressed: () async{
+                  selected = MapEntry(element, httpAutocompletes[element].toString());
+                  widget.callback(selected); Navigator.of(context).pop();
+                }, 
+                child: Text(element),))
         ],
       )
     );
