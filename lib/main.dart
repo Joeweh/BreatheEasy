@@ -6,7 +6,6 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:http/http.dart' as http;
 
-import 'package:http/http.dart' as http;
 void main() async {
   // Load Environment Variables
   await dotenv.load(fileName: '.env');
@@ -45,7 +44,7 @@ class _MyHomePageState extends State<MyHomePage> {
   {
     return const Scaffold(
       body: DirectionPage() // Change to Direction Page if you want to see the page with the maps on it
-      body: SearchBarPageState() // Change to Direction Page if you want to see the page with the maps on it
+      //SearchBarPageState for inputs
     );
   }
 }
@@ -66,21 +65,6 @@ class _DirectionPageState extends State<DirectionPage> {
   PolylinePoints polylinePoints = PolylinePoints();
   List<LatLng> polylineCoordinates = [];
   var api_key = (dotenv.env['MAPS_API_KEY']).toString();
-  String startQuery = "";
-  String endQuery = "";
-
-  final LatLng _center = const LatLng(43.281631, -0.802300);
-
-  void setStartQuery(String s)
-  {
-    startQuery = s;
-  }
-
-  void setEndQuery(String s)
-  {
-    endQuery = s;
-  }
-
   String startQuery = "";
   String endQuery = "";
 
@@ -139,7 +123,6 @@ class _DirectionPageState extends State<DirectionPage> {
       _markers.add(Marker(markerId: MarkerId(markerId), position: l,)); 
     });
   }
-}
 
   getDirections(List<Marker> markers, newSetState) async {
     List<LatLng> polylineCoordinates = [];
@@ -171,10 +154,10 @@ class _DirectionPageState extends State<DirectionPage> {
     _polylines[id] = polyline;
     newSetState((){});
   }
-  
-  
+
 }
 
+  
 class LocationBar extends StatelessWidget {
   final ValueChanged<String> callback;
 
