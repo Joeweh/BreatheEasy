@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-<<<<<<< HEAD
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:http/http.dart' as http;
-=======
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart' as places;
 
->>>>>>> origin/basiclayout
 
 void main() async {
   // Load Environment Variables
@@ -48,12 +45,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) 
   {
     return const Scaffold(
-<<<<<<< HEAD
-      body: DirectionPage() // Change to Direction Page if you want to see the page with the maps on it
-      //SearchBarPageState for inputs
-=======
       body: DirectionPage()
->>>>>>> origin/basiclayout
     );
   }
 }
@@ -70,18 +62,13 @@ class DirectionPage extends StatefulWidget {
 class _DirectionPageState extends State<DirectionPage> {
   late GoogleMapController mapController;
   final Set<Marker> _markers = {};
-<<<<<<< HEAD
   Map<PolylineId, Polyline> _polylines = {};
   PolylinePoints polylinePoints = PolylinePoints();
   List<LatLng> polylineCoordinates = [];
   var api_key = (dotenv.env['MAPS_API_KEY']).toString();
-  String startQuery = "";
-  String endQuery = "";
-=======
 
   MapEntry<String, String> startQuery = MapEntry("Origin", "");
   MapEntry<String, String> endQuery = MapEntry("Destination", "");
->>>>>>> origin/basiclayout
 
   final LatLng _center = const LatLng(43.281631, -0.802300);
 
@@ -117,12 +104,10 @@ class _DirectionPageState extends State<DirectionPage> {
     );
   }
 
-<<<<<<< HEAD
   List<LatLng> latLen = [LatLng(43.3, -0.8), LatLng(43.281631, -0.802300)];
   List<Marker> marks = [Marker(markerId: MarkerId('Test1'), position: LatLng(43.3, -0.8)), 
   Marker(markerId: MarkerId('Test2'), position: LatLng(43.281631, -0.802300))];
   
-=======
   TextField location(BuildContext context, MapEntry<String, String> location, Function(MapEntry<String, String>) m) {
     return TextField(
           onTap: () {
@@ -145,7 +130,6 @@ class _DirectionPageState extends State<DirectionPage> {
         );
   }
 
->>>>>>> origin/basiclayout
   Widget googleMapWidget()
   {
     _addMarker(const LatLng(43.3, -0.8), "Test Marker 1");
@@ -201,13 +185,8 @@ class _DirectionPageState extends State<DirectionPage> {
 
 }
 
-<<<<<<< HEAD
-  
-class LocationBar extends StatelessWidget {
-=======
 
 class LocationBar extends StatefulWidget {
->>>>>>> origin/basiclayout
   final ValueChanged<String> callback;
   LocationBar({key, required this.callback});
   
