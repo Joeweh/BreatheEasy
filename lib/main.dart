@@ -4,6 +4,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart' as places;
+import 'package:breathe_easy/api.dart';
 
 
 void main() async {
@@ -244,6 +245,8 @@ class _SearchBarPageState extends State<SearchBarPageState> {
 
   @override
   Widget build(BuildContext context) {
+    print("Test123");
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -291,25 +294,35 @@ class _SearchBarPageState extends State<SearchBarPageState> {
 
   void fetchPlacesAutcomplete(String query) async
   {
-    Map<String, String> m = {};
+    // Map<String, String> m = {};
     
-    if (query == "")
-    {
-      m = {};
-    }
-    else
-    {
-      places.LatLng l = const places.LatLng(lat: 43.281631, lng: -0.802300, ); // Temp constant lat long coordinates
-      places.LatLngBounds bounds = places.LatLngBounds(
-        southwest: places.LatLng(lat: l.lat - 1, lng: l.lng - 1),
-        northeast: places.LatLng(lat: l.lat + 1, lng: l.lng + 1)
-      );
+    // if (query == "")
+    // {
+    //   m = {};
+    // }
+    // else
+    // {
+    //   places.LatLng l = const places.LatLng(lat: 43.281631, lng: -0.802300, ); // Temp constant lat long coordinates
+    //   places.LatLngBounds bounds = places.LatLngBounds(
+    //     southwest: places.LatLng(lat: l.lat - 1, lng: l.lng - 1),
+    //     northeast: places.LatLng(lat: l.lat + 1, lng: l.lng + 1)
+    //   );
 
-      var locations = places.FlutterGooglePlacesSdk(dotenv.env['MAPS_API_KEY']!);
-      var predictions = await locations.findAutocompletePredictions(query, origin: l, locationBias: bounds);
+    //   var locations = places.FlutterGooglePlacesSdk(dotenv.env['MAPS_API_KEY']!);
+    //   var predictions = await locations.findAutocompletePredictions(query, origin: l, locationBias: bounds);
 
-      predictions.predictions.forEach((element) {m[element.primaryText] = element.placeId;});
-    }
+    //   predictions.predictions.forEach((element) {m[element.primaryText] = element.placeId;});
+    // }
+
+    // setState(() {
+    //   httpAutocompletes = m;
+    // });
+
+    Map<String, String> m = {};
+    ApiCall a = ApiCall();
+    PlacePrediction p = await a.placeCall(query, LatLng(51.5, 0.1));
+
+    p.autocompletes.forEach((element) {m[element.key] = element.value; });
 
     setState(() {
       httpAutocompletes = m;
