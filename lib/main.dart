@@ -93,12 +93,12 @@ class _DirectionPageState extends State<DirectionPage> {
     return Container(
       margin: const EdgeInsets.all(10),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          googleMapWidget(),
-          const SizedBox(height: 20),
+          googleMapWidget(context),
+          SizedBox(height: MediaQuery.of(context).size.height * .015),
           location(context, startQuery, setStartQuery),
-          const SizedBox(height: 20),
+          SizedBox(height: MediaQuery.of(context).size.height * .025),
           location(context, endQuery, setEndQuery)
         ],
       ),
@@ -123,20 +123,20 @@ class _DirectionPageState extends State<DirectionPage> {
           showCursor: false,
           decoration: InputDecoration(
               hintText: location.key,
-              hintStyle: const TextStyle(
-                  fontWeight: FontWeight.w500, fontSize: 24),
+              hintStyle: TextStyle(
+                  fontWeight: FontWeight.w500, fontSize: MediaQuery.of(context).size.height * .025, height: 1),
               filled: true,
               fillColor: Colors.grey[200],
               border: InputBorder.none),
         );
   }
 
-  Widget googleMapWidget()
+  Widget googleMapWidget(BuildContext context)
   {
     _addMarker(const LatLng(43.3, -0.8), "Test Marker 1");
     _addMarker(const LatLng(43.281631, -0.802300), "Test Marker 2");
     getDirections(marks, setState);
-    return Container(height: 600, margin: const EdgeInsets.all(10), child: GoogleMap(onMapCreated: _onMapCreated, initialCameraPosition: CameraPosition(target: _center, zoom: 11.0,), markers: _markers, polylines: Set<Polyline>.of(_polylines.values)));
+    return Container(height: MediaQuery.of(context).size.height * .81, margin: const EdgeInsets.all(10), child: GoogleMap(onMapCreated: _onMapCreated, initialCameraPosition: CameraPosition(target: _center, zoom: 11.0,), markers: _markers, polylines: Set<Polyline>.of(_polylines.values)));
   }
 
   void _onMapCreated(GoogleMapController controller)
@@ -178,7 +178,7 @@ class _DirectionPageState extends State<DirectionPage> {
   }
 
   addPolyLine(List<LatLng> polylineCoordinates, newSetState){
-    PolylineId id = PolylineId("Poly");
+    PolylineId id = const PolylineId("Poly");
     Polyline polyline = Polyline(polylineId: id, color: Colors.blue, points: polylineCoordinates);
     _polylines[id] = polyline;
     newSetState((){});
