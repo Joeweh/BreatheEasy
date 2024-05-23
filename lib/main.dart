@@ -67,6 +67,8 @@ class _DirectionPageState extends State<DirectionPage> {
   PolylinePoints polylinePoints = PolylinePoints();
   List<LatLng> polylineCoordinates = [];
   var api_key = (dotenv.env['MAPS_API_KEY']).toString();
+  var originTextField = TextEditingController();
+  var destinationTextField = TextEditingController();
 
   MapEntry<String, String> startQuery = MapEntry("Origin", "");
   MapEntry<String, String> endQuery = MapEntry("Destination", "");
@@ -75,31 +77,48 @@ class _DirectionPageState extends State<DirectionPage> {
 
   void setStartQuery(MapEntry<String, String> s)
   {
-    setState(() {
-      startQuery = s;
-    });
+    if (s.value != "")
+    {
+      setState(() 
+      {
+        startQuery = s;
+        originTextField.text = s.key;
+      });
+    }
   }
 
   void setEndQuery(MapEntry<String, String> s)
   {
-    setState(() {
-      endQuery = s;
-    });
+    if (s.value != "")
+    {
+      setState(() 
+      {
+        endQuery = s;
+        destinationTextField.text = s.key;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
 
     return Container(
-      margin: const EdgeInsets.all(10),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          googleMapWidget(),
-          const SizedBox(height: 20),
-          location(context, startQuery, setStartQuery),
-          const SizedBox(height: 20),
-          location(context, endQuery, setEndQuery)
+          Container(child: Text("Placeholder"),), // Add details here when necessary
+          Expanded(child: googleMapWidget()),
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: const BoxDecoration(color: Colors.white, boxShadow: [BoxShadow(color: Colors.white, offset: Offset(0, -0.25), blurRadius: 5.0, spreadRadius: 0.1)]),
+            child: Column(
+              children: [
+                location(context, startQuery, setStartQuery, "Starting Location", originTextField),
+                const SizedBox(height: 20),
+                location(context, endQuery, setEndQuery, "Destination", destinationTextField),
+              ],
+            ),
+          )
         ],
       ),
     );
@@ -109,8 +128,9 @@ class _DirectionPageState extends State<DirectionPage> {
   List<Marker> marks = [Marker(markerId: MarkerId('Test1'), position: LatLng(43.3, -0.8)), 
   Marker(markerId: MarkerId('Test2'), position: LatLng(43.281631, -0.802300))];
   
-  TextField location(BuildContext context, MapEntry<String, String> location, Function(MapEntry<String, String>) m) {
+  TextField location(BuildContext context, MapEntry<String, String> location, Function(MapEntry<String, String>) m, String labelString, var txtController) {
     return TextField(
+      controller: txtController,
           onTap: () {
             Navigator.push(
               context,
@@ -122,12 +142,8 @@ class _DirectionPageState extends State<DirectionPage> {
           autofocus: false,
           showCursor: false,
           decoration: InputDecoration(
-              hintText: location.key,
-              hintStyle: const TextStyle(
-                  fontWeight: FontWeight.w500, fontSize: 24),
-              filled: true,
-              fillColor: Colors.grey[200],
-              border: InputBorder.none),
+              labelText: labelString,
+              border: OutlineInputBorder()),
         );
   }
 
@@ -136,7 +152,7 @@ class _DirectionPageState extends State<DirectionPage> {
     _addMarker(const LatLng(43.3, -0.8), "Test Marker 1");
     _addMarker(const LatLng(43.281631, -0.802300), "Test Marker 2");
     getDirections(marks, setState);
-    return Container(height: 600, margin: const EdgeInsets.all(10), child: GoogleMap(onMapCreated: _onMapCreated, initialCameraPosition: CameraPosition(target: _center, zoom: 11.0,), markers: _markers, polylines: Set<Polyline>.of(_polylines.values)));
+    return Container(height: 600, child: GoogleMap(onMapCreated: _onMapCreated, initialCameraPosition: CameraPosition(target: _center, zoom: 11.0,), markers: _markers, polylines: Set<Polyline>.of(_polylines.values)));
   }
 
   void _onMapCreated(GoogleMapController controller)
@@ -245,8 +261,6 @@ class _SearchBarPageState extends State<SearchBarPageState> {
 
   @override
   Widget build(BuildContext context) {
-    print("Test123");
-
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -269,7 +283,7 @@ class _SearchBarPageState extends State<SearchBarPageState> {
     );
   }
 
-  Container placesAutoComplete() // Does not work yet
+  Container placesAutoComplete()
   {
     List<String> locs = httpAutocompletes.entries.map((entry) => entry.key).toList();
 
