@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
-import 'package:http/http.dart' as http;
-import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart' as places;
 import 'package:breathe_easy/api.dart';
 
 
@@ -17,7 +15,6 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -208,11 +205,6 @@ class _DirectionPageState extends State<DirectionPage> {
 class LocationBar extends StatefulWidget {
   final ValueChanged<String> callback;
   LocationBar({key, required this.callback});
-  
-  @override
-  void initState() {
-
-  }
 
   @override
   State<LocationBar> createState() => LocationBarState(callback: callback);
@@ -310,30 +302,6 @@ class _SearchBarPageState extends State<SearchBarPageState> {
 
   void fetchPlacesAutcomplete(String query) async
   {
-    // Map<String, String> m = {};
-    
-    // if (query == "")
-    // {
-    //   m = {};
-    // }
-    // else
-    // {
-    //   places.LatLng l = const places.LatLng(lat: 43.281631, lng: -0.802300, ); // Temp constant lat long coordinates
-    //   places.LatLngBounds bounds = places.LatLngBounds(
-    //     southwest: places.LatLng(lat: l.lat - 1, lng: l.lng - 1),
-    //     northeast: places.LatLng(lat: l.lat + 1, lng: l.lng + 1)
-    //   );
-
-    //   var locations = places.FlutterGooglePlacesSdk(dotenv.env['MAPS_API_KEY']!);
-    //   var predictions = await locations.findAutocompletePredictions(query, origin: l, locationBias: bounds);
-
-    //   predictions.predictions.forEach((element) {m[element.primaryText] = element.placeId;});
-    // }
-
-    // setState(() {
-    //   httpAutocompletes = m;
-    // });
-
     Map<String, String> m = {};
     ApiCall a = ApiCall();
     PlacePrediction p = await a.placeCall(query, LatLng(51.5, 0.1));
