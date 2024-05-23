@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
         useMaterial3: true,
       ),
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
@@ -110,7 +110,7 @@ class _DirectionPageState extends State<DirectionPage> {
           Expanded(child: googleMapWidget()),
           Container(
             padding: const EdgeInsets.all(20),
-            decoration: const BoxDecoration(color: Colors.white, boxShadow: [BoxShadow(color: Colors.white, offset: Offset(0, -0.25), blurRadius: 5.0, spreadRadius: 0.1)]),
+            decoration: BoxDecoration(color: Theme.of(context).canvasColor, boxShadow: [BoxShadow(color: Colors.white, offset: Offset(0, -0.25), blurRadius: 5.0, spreadRadius: 0.1)]),
             child: Column(
               children: [
                 location(context, startQuery, setStartQuery, "Starting Location", originTextField),
@@ -142,6 +142,8 @@ class _DirectionPageState extends State<DirectionPage> {
           autofocus: false,
           showCursor: false,
           decoration: InputDecoration(
+              filled: true,
+              fillColor: Theme.of(context).scaffoldBackgroundColor,
               labelText: labelString,
               border: OutlineInputBorder()),
         );
