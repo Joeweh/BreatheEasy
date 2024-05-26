@@ -62,6 +62,8 @@ class _DirectionPageState extends State<DirectionPage> {
   var api_key = (dotenv.env['MAPS_API_KEY']).toString();
   var originTextField = TextEditingController();
   var destinationTextField = TextEditingController();
+  double numRoutes = 5; // Test Num
+  double curRoute = 0;
 
   MapEntry<String, String> startQuery = MapEntry("Origin", "");
   MapEntry<String, String> endQuery = MapEntry("Destination", "");
@@ -163,6 +165,32 @@ class _DirectionPageState extends State<DirectionPage> {
                   const SizedBox(height: 20),
                   location(context, endQuery, setEndQuery, "Destination",
                       destinationTextField),
+                  if (startQuery.value != "" && endQuery.value != "")
+                    Container(
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 20),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Text("Route #: "),
+                              Slider(
+                                value: curRoute,
+                                max: numRoutes,
+                                divisions: numRoutes as int,
+                                onChanged: (double value) {
+                                  setState(() {
+                                    curRoute = value;
+                                  });
+                                },
+                                label: curRoute.round().toString(),
+                              ),
+                              FilledButton(onPressed: () {}, child: Text("Start Route"))
+                            ],
+                          ),
+                        ],
+                      ),
+                    )
                 ],
               ),
             )
@@ -374,8 +402,8 @@ class _SearchBarPageState extends State<SearchBarPageState> {
                     widget.callback(selected);
                     Navigator.of(context).pop();
                   },
-                  tileColor: Theme.of(context).colorScheme.primary.withOpacity(
-                      0.1), 
+                  tileColor:
+                      Theme.of(context).colorScheme.primary.withOpacity(0.1),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.0),
                   ),
