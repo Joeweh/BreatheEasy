@@ -256,22 +256,20 @@ class _SearchBarPageState extends State<SearchBarPageState> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {widget.callback(MapEntry("","")); Navigator.of(context).pop();},
-        ), 
-        centerTitle: true,
-      ),
       body: Container(
         margin: const EdgeInsets.all(10),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            LocationBar(callback: fetchPlacesAutcomplete,),
-            placesAutoComplete(),
-          ],
+            Column(
+              children: [
+                LocationBar(callback: fetchPlacesAutcomplete,),
+                placesAutoComplete(),
+              ],
+            ),
+            FilledButton.tonal(onPressed: () { widget.callback(MapEntry("","")); Navigator.of(context).pop(); }, child: const Text("Exit")),
+          ]
         ),
       ),
     );
