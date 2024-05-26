@@ -183,7 +183,7 @@ class _DirectionPageState extends State<DirectionPage> {
                                     curRoute = value;
                                   });
                                 },
-                                label: curRoute.round().toString(),
+                                label: (curRoute + 1).round().toString(),
                               ),
                               FilledButton(onPressed: () {}, child: Text("Start Route"))
                             ],
