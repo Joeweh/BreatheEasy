@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
@@ -110,37 +109,37 @@ class _DirectionPageState extends State<DirectionPage> {
         backgroundColor: Color.fromARGB(255, 2, 110, 44),
       ),
       drawer: Drawer(
-      child: ListView(
-        // Important: Remove any padding from the ListView.
-        padding: EdgeInsets.zero,
-        children: [
-          const DrawerHeader(
-            decoration: BoxDecoration(
-              color: Color.fromARGB(255, 2, 110, 44),
+        child: ListView(
+          // Important: Remove any padding from the ListView.
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Color.fromARGB(255, 2, 110, 44),
+              ),
+              child: Text('Settings'),
             ),
-            child: Text('Settings'),
-          ),
-          ListTile(
-            leading: const Icon(
-              Icons.settings,
+            ListTile(
+              leading: const Icon(
+                Icons.settings,
+              ),
+              title: const Text('User Preferences'),
+              onTap: () {
+                Navigator.pop(context);
+              },
             ),
-            title: const Text('User Preferences'),
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            leading: const Icon(
-              Icons.stacked_bar_chart_sharp,
+            ListTile(
+              leading: const Icon(
+                Icons.stacked_bar_chart_sharp,
+              ),
+              title: const Text('User Stats'),
+              onTap: () {
+                Navigator.pop(context);
+              },
             ),
-            title: const Text('User Stats'),
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
       body: Container(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.end,
@@ -366,16 +365,23 @@ class _SearchBarPageState extends State<SearchBarPageState> {
           children: [
             for (String element in locs)
               Container(
-                  margin: const EdgeInsets.all(10),
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      selected = MapEntry(
-                          element, httpAutocompletes[element].toString());
-                      widget.callback(selected);
-                      Navigator.of(context).pop();
-                    },
-                    child: Text(element),
-                  ))
+                margin: EdgeInsets.symmetric(vertical: 10),
+                child: ListTile(
+                  title: Text(element),
+                  onTap: () async {
+                    selected = MapEntry(
+                        element, httpAutocompletes[element].toString());
+                    widget.callback(selected);
+                    Navigator.of(context).pop();
+                  },
+                  tileColor: Theme.of(context).colorScheme.primary.withOpacity(
+                      0.1), 
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+                ),
+              ),
           ],
         ));
   }
