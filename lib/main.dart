@@ -109,7 +109,38 @@ class _DirectionPageState extends State<DirectionPage> {
         centerTitle: true,
         backgroundColor: Color.fromARGB(255, 2, 110, 44),
       ),
-      drawer: Drawer(),
+      drawer: Drawer(
+      child: ListView(
+        // Important: Remove any padding from the ListView.
+        padding: EdgeInsets.zero,
+        children: [
+          const DrawerHeader(
+            decoration: BoxDecoration(
+              color: Color.fromARGB(255, 2, 110, 44),
+            ),
+            child: Text('Settings'),
+          ),
+          ListTile(
+            leading: const Icon(
+              Icons.settings,
+            ),
+            title: const Text('User Preferences'),
+            onTap: () {
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            leading: const Icon(
+              Icons.stacked_bar_chart_sharp,
+            ),
+            title: const Text('User Stats'),
+            onTap: () {
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+    ),
       body: Container(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.end,
