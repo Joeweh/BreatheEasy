@@ -1,8 +1,11 @@
+import 'dart:html';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:breathe_easy/api.dart';
+import 'package:location/location.dart';
 
 void main() async {
   // Load Environment Variables
@@ -67,8 +70,8 @@ class _DirectionPageState extends State<DirectionPage> {
 
   MapEntry<String, String> startQuery = MapEntry("Origin", "");
   MapEntry<String, String> endQuery = MapEntry("Destination", "");
-
-  final LatLng _center = const LatLng(43.281631, -0.802300);
+  
+  LatLng _center = const LatLng(43.281631, -0.802300);
 
   void setStartQuery(MapEntry<String, String> s) {
     if (s.value != "") {
@@ -146,7 +149,7 @@ class _DirectionPageState extends State<DirectionPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            Expanded(child: googleMapWidget()),
+            Expanded(child: googleMapWidget(context)),
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
@@ -235,20 +238,46 @@ class _DirectionPageState extends State<DirectionPage> {
     );
   }
 
-  Widget googleMapWidget() {
+  Widget googleMapWidget(BuildContext context)
+  {
+    askForLocation();
     _addMarker(const LatLng(43.3, -0.8), "Test Marker 1");
     _addMarker(const LatLng(43.281631, -0.802300), "Test Marker 2");
     getDirections(marks, setState);
-    return Container(
-        height: 600,
-        child: GoogleMap(
-            onMapCreated: _onMapCreated,
-            initialCameraPosition: CameraPosition(
-              target: _center,
-              zoom: 11.0,
-            ),
-            markers: _markers,
-            polylines: Set<Polyline>.of(_polylines.values)));
+
+    return Container(height: MediaQuery.of(context).size.height * .81, margin: const EdgeInsets.all(10), child: GoogleMap(onMapCreated: _onMapCreated, initialCameraPosition: CameraPosition(target: _center, zoom: 11.0,), markers: _markers, polylines: Set<Polyline>.of(_polylines.values)));
+  }
+
+  void askForLocation() async {
+    var location = Location();
+
+    // blah blah blah please give me your location
+    var serviceEnabled = await location.serviceEnabled();
+
+    if (!serviceEnabled) {
+      serviceEnabled = await location.requestService();
+
+      if (!serviceEnabled) {
+        print('location not allowed');
+        return;
+      }
+    }
+
+    var permissionGranted = await location.hasPermission();
+
+    if (permissionGranted == PermissionStatus.denied) {
+      permissionGranted = await location.requestPermission();
+      if (permissionGranted != PermissionStatus.granted) {
+        print('location permission denied');
+        return;
+      }
+    }
+
+    // listens for changes in user's location
+    location.onLocationChanged.listen((LocationData currentLocation) {
+      // update variables when location changes
+      mapController.animateCamera(CameraUpdate.newLatLngZoom(LatLng(currentLocation.latitude as double, currentLocation.longitude as double), 13));
+    });
   }
 
   void _onMapCreated(GoogleMapController controller) {
