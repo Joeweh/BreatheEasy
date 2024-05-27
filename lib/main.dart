@@ -70,8 +70,10 @@ class _DirectionPageState extends State<DirectionPage> {
 
   MapEntry<String, String> startQuery = MapEntry("Origin", "");
   MapEntry<String, String> endQuery = MapEntry("Destination", "");
-  
+
   LatLng _center = const LatLng(43.281631, -0.802300);
+
+  bool noSpikes = false;
 
   void setStartQuery(MapEntry<String, String> s) {
     if (s.value != "") {
@@ -118,30 +120,24 @@ class _DirectionPageState extends State<DirectionPage> {
           // Important: Remove any padding from the ListView.
           padding: EdgeInsets.zero,
           children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(
-                color: Color.fromARGB(255, 2, 110, 44),
-              ),
-              child: Text('Settings'),
+            ListTile(
+              title: const Text("BreatheEasy"),
             ),
             ListTile(
-              leading: const Icon(
-                Icons.settings,
-              ),
-              title: const Text('User Preferences'),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(
-                Icons.stacked_bar_chart_sharp,
-              ),
-              title: const Text('User Stats'),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
+                title: Row(
+              children: [
+                Text("No Spikes in AQ: "),
+                Transform.scale(scale: 0.8, child: Switch(
+                  value: noSpikes,
+                  onChanged: ((bool value) {
+                    setState(() {
+                      noSpikes = value;
+                    });
+                  }),
+                  activeColor: Colors.green,
+                ),)
+              ],
+            )),
           ],
         ),
       ),
@@ -177,7 +173,8 @@ class _DirectionPageState extends State<DirectionPage> {
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
                               Text("Route #: "),
-                              Expanded(child: Slider(
+                              Expanded(
+                                  child: Slider(
                                 value: curRoute,
                                 max: numRoutes - 1,
                                 divisions: (numRoutes as int) - 1,
@@ -188,7 +185,10 @@ class _DirectionPageState extends State<DirectionPage> {
                                 },
                                 label: (curRoute + 1).round().toString(),
                               )),
-                              Expanded(child: FilledButton(onPressed: () {}, child: Text("Start Route"))),
+                              Expanded(
+                                  child: FilledButton(
+                                      onPressed: () {},
+                                      child: Text("Start Route"))),
                             ],
                           ),
                         ],
@@ -239,14 +239,21 @@ class _DirectionPageState extends State<DirectionPage> {
     );
   }
 
-  Widget googleMapWidget(BuildContext context)
-  {
+  Widget googleMapWidget(BuildContext context) {
     askForLocation();
     _addMarker(const LatLng(43.3, -0.8), "Test Marker 1");
     _addMarker(const LatLng(43.281631, -0.802300), "Test Marker 2");
     getDirections(marks, setState);
 
-    return Container(child: GoogleMap(onMapCreated: _onMapCreated, initialCameraPosition: CameraPosition(target: _center, zoom: 11.0,), markers: _markers, polylines: Set<Polyline>.of(_polylines.values)));
+    return Container(
+        child: GoogleMap(
+            onMapCreated: _onMapCreated,
+            initialCameraPosition: CameraPosition(
+              target: _center,
+              zoom: 11.0,
+            ),
+            markers: _markers,
+            polylines: Set<Polyline>.of(_polylines.values)));
   }
 
   void askForLocation() async {
@@ -277,10 +284,14 @@ class _DirectionPageState extends State<DirectionPage> {
     // listens for changes in user's location
     location.onLocationChanged.listen((LocationData currentLocation) {
       // update variables when location changes
-      mapController.animateCamera(CameraUpdate.newLatLngZoom(LatLng(currentLocation.latitude as double, currentLocation.longitude as double), 13));
+      mapController.animateCamera(CameraUpdate.newLatLngZoom(
+          LatLng(currentLocation.latitude as double,
+              currentLocation.longitude as double),
+          13));
 
-      LatLng l = LatLng(currentLocation.latitude as double, currentLocation.longitude as double);
-      
+      LatLng l = LatLng(currentLocation.latitude as double,
+          currentLocation.longitude as double);
+
       _center = l;
       print(_center.latitude);
       print(_center.longitude);
@@ -382,7 +393,8 @@ class SearchBarPageState extends StatefulWidget {
   final Function(MapEntry<String, String>) callback;
   final LatLng location;
 
-  const SearchBarPageState({super.key, required this.callback, required this.location});
+  const SearchBarPageState(
+      {super.key, required this.callback, required this.location});
 
   @override
   State<SearchBarPageState> createState() => _SearchBarPageState();
