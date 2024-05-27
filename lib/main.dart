@@ -335,6 +335,7 @@ class LocationBarState extends State<LocationBar> {
         onChanged: (value) {
           callback(value);
         },
+        autofocus: true,
       ),
     );
   }
