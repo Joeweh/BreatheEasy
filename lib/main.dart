@@ -57,6 +57,12 @@ class DirectionPage extends StatefulWidget {
 }
 
 class _DirectionPageState extends State<DirectionPage> {
+  int aq = 0;
+  int miles = 0;
+
+  // in minutes
+  int est = 0;
+
   late GoogleMapController mapController;
   final Set<Marker> _markers = {};
   Map<PolylineId, Polyline> _polylines = {};
@@ -74,6 +80,37 @@ class _DirectionPageState extends State<DirectionPage> {
   LatLng _center = const LatLng(43.281631, -0.802300);
 
   bool noSpikes = false;
+  void setNumRoutes(double x){
+    numRoutes = x;
+  }
+
+  double getNumRoutes(){
+    return numRoutes;
+  }
+
+  void setAQ(int x){
+    aq = x;
+  }
+
+  int getAQ(){
+    return aq;
+  }
+
+  void setMiles(int x){
+    miles = x;
+  }
+
+  int getMiles(){
+    return miles;
+  }
+
+  void setEst(int x){
+    est = x;
+  }
+
+  int getEst(){
+    return est;
+  }
 
   void setStartQuery(MapEntry<String, String> s) {
     if (s.value != "") {
@@ -97,17 +134,17 @@ class _DirectionPageState extends State<DirectionPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("EST"),
-        actions: const [
+        title: Text(startQuery.value != "" && endQuery.value != "" ? "EST:" + est.toString() : ""),
+        actions: [
           Row(
             children: [
               Padding(
                 padding: EdgeInsets.all(10.0),
-                child: Text("AQ"),
+                child: Text(startQuery.value != "" && endQuery.value != "" ? "AQ:" + aq.toString() : ""),
               ),
               Padding(
                 padding: EdgeInsets.all(10.0),
-                child: Text("MINS"),
+                child: Text(startQuery.value != "" && endQuery.value != "" ? "MILES:" + miles.toString() : ""),
               )
             ],
           )
