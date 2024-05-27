@@ -224,6 +224,7 @@ class _DirectionPageState extends State<DirectionPage> {
               fullscreenDialog: true),
         );
       },
+      readOnly: true,
       autofocus: false,
       showCursor: false,
       decoration: InputDecoration(
