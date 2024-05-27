@@ -154,7 +154,7 @@ class _DirectionPageState extends State<DirectionPage> {
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                   color: Theme.of(context).canvasColor,
-                  boxShadow: [
+                  boxShadow: const [
                     BoxShadow(
                         color: Colors.white,
                         offset: Offset(0, -0.25),
@@ -245,7 +245,7 @@ class _DirectionPageState extends State<DirectionPage> {
     _addMarker(const LatLng(43.281631, -0.802300), "Test Marker 2");
     getDirections(marks, setState);
 
-    return Container(height: MediaQuery.of(context).size.height * .81, margin: const EdgeInsets.all(10), child: GoogleMap(onMapCreated: _onMapCreated, initialCameraPosition: CameraPosition(target: _center, zoom: 11.0,), markers: _markers, polylines: Set<Polyline>.of(_polylines.values)));
+    return Container(child: GoogleMap(onMapCreated: _onMapCreated, initialCameraPosition: CameraPosition(target: _center, zoom: 11.0,), markers: _markers, polylines: Set<Polyline>.of(_polylines.values)));
   }
 
   void askForLocation() async {
