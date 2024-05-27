@@ -177,7 +177,7 @@ class _DirectionPageState extends State<DirectionPage> {
                               Slider(
                                 value: curRoute,
                                 max: numRoutes,
-                                divisions: (numRoutes as int) - 1,
+                                divisions: numRoutes as int,
                                 onChanged: (double value) {
                                   setState(() {
                                     curRoute = value;
