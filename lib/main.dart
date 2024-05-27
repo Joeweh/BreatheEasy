@@ -177,7 +177,7 @@ class _DirectionPageState extends State<DirectionPage> {
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
                               Text("Route #: "),
-                              Slider(
+                              Expanded(child: Slider(
                                 value: curRoute,
                                 max: numRoutes - 1,
                                 divisions: (numRoutes as int) - 1,
@@ -187,8 +187,8 @@ class _DirectionPageState extends State<DirectionPage> {
                                   });
                                 },
                                 label: (curRoute + 1).round().toString(),
-                              ),
-                              FilledButton(onPressed: () {}, child: Text("Start Route"))
+                              )),
+                              Expanded(child: FilledButton(onPressed: () {}, child: Text("Start Route"))),
                             ],
                           ),
                         ],
