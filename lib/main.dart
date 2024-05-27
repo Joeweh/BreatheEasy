@@ -223,6 +223,7 @@ class _DirectionPageState extends State<DirectionPage> {
           MaterialPageRoute(
               builder: (context) => SearchBarPageState(
                     callback: m,
+                    location: _center,
                   ),
               fullscreenDialog: true),
         );
@@ -277,6 +278,12 @@ class _DirectionPageState extends State<DirectionPage> {
     location.onLocationChanged.listen((LocationData currentLocation) {
       // update variables when location changes
       mapController.animateCamera(CameraUpdate.newLatLngZoom(LatLng(currentLocation.latitude as double, currentLocation.longitude as double), 13));
+
+      LatLng l = LatLng(currentLocation.latitude as double, currentLocation.longitude as double);
+      
+      _center = l;
+      print(_center.latitude);
+      print(_center.longitude);
     });
   }
 
@@ -373,8 +380,9 @@ class LocationBarState extends State<LocationBar> {
 
 class SearchBarPageState extends StatefulWidget {
   final Function(MapEntry<String, String>) callback;
+  final LatLng location;
 
-  const SearchBarPageState({super.key, required this.callback});
+  const SearchBarPageState({super.key, required this.callback, required this.location});
 
   @override
   State<SearchBarPageState> createState() => _SearchBarPageState();
@@ -448,7 +456,7 @@ class _SearchBarPageState extends State<SearchBarPageState> {
   void fetchPlacesAutcomplete(String query) async {
     Map<String, String> m = {};
     ApiCall a = ApiCall();
-    PlacePrediction p = await a.placeCall(query, LatLng(51.5, 0.1));
+    PlacePrediction p = await a.placeCall(query, widget.location);
 
     p.autocompletes.forEach((element) {
       m[element.key] = element.value;
