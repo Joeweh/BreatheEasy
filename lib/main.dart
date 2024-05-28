@@ -3,12 +3,12 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:breathe_easy/api.dart';
-
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 void main() async {
   // Load Environment Variables
   await dotenv.load(fileName: '.env');
-
   runApp(const MyApp());
 }
 
@@ -40,8 +40,7 @@ class _MyHomePageState extends State<MyHomePage> {
   var selectedIndex = 0;
 
   @override
-  Widget build(BuildContext context) 
-  {
+  Widget build(BuildContext context) {
     return const Scaffold(
       body: DirectionPage()
     );
@@ -59,148 +58,175 @@ class DirectionPage extends StatefulWidget {
 
 class _DirectionPageState extends State<DirectionPage> {
   late GoogleMapController mapController;
-  final Set<Marker> _markers = {};
-  Map<PolylineId, Polyline> _polylines = {};
-  PolylinePoints polylinePoints = PolylinePoints();
-  List<LatLng> polylineCoordinates = [];
+  Marker? _startMarker; 
+  Marker? _endMarker;
   var api_key = (dotenv.env['MAPS_API_KEY']).toString();
+  MapEntry<String, String> startQuery = MapEntry("Origin", "");
+  MapEntry<String, String> endQuery = MapEntry("Destination", "");
   var originTextField = TextEditingController();
   var destinationTextField = TextEditingController();
 
-  MapEntry<String, String> startQuery = MapEntry("Origin", "");
-  MapEntry<String, String> endQuery = MapEntry("Destination", "");
+  bool isRequestingStart = false;
+  bool isRequestingEnd = false;
+
+  Map<PolylineId, Polyline> polylines = {};
+  List<LatLng> polylineCoordinates = [];
+  PolylinePoints polylinePoints = PolylinePoints();
 
   final LatLng _center = const LatLng(43.281631, -0.802300);
 
-  void setStartQuery(MapEntry<String, String> s)
-  {
-    if (s.value != "")
-    {
-      setState(() 
-      {
+  void setStartQuery(MapEntry<String, String> s) {
+    if (s.value != "") {
+      setState(() {
         startQuery = s;
         originTextField.text = s.key;
       });
+      getLatLng(s, true);
     }
   }
 
-  void setEndQuery(MapEntry<String, String> s)
-  {
-    if (s.value != "")
-    {
-      setState(() 
-      {
+  void setEndQuery(MapEntry<String, String> s) {
+    if (s.value != "") {
+      setState(() {
         endQuery = s;
         destinationTextField.text = s.key;
       });
+      getLatLng(s, false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Container(
+      margin: const EdgeInsets.all(10),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          Container(child: Text("Placeholder"),), // Add details here when necessary
-          Expanded(child: googleMapWidget()),
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(color: Theme.of(context).canvasColor, boxShadow: [BoxShadow(color: Colors.white, offset: Offset(0, -0.25), blurRadius: 5.0, spreadRadius: 0.1)]),
-            child: Column(
-              children: [
-                location(context, startQuery, setStartQuery, "Starting Location", originTextField),
-                const SizedBox(height: 20),
-                location(context, endQuery, setEndQuery, "Destination", destinationTextField),
-              ],
-            ),
-          )
+          googleMapWidget(),
+          const SizedBox(height: 20),
+          location(context, startQuery, setStartQuery),
+          const SizedBox(height: 20),
+          location(context, endQuery, setEndQuery)
         ],
       ),
     );
   }
-
-  List<LatLng> latLen = [LatLng(43.3, -0.8), LatLng(43.281631, -0.802300)];
-  List<Marker> marks = [Marker(markerId: MarkerId('Test1'), position: LatLng(43.3, -0.8)), 
-  Marker(markerId: MarkerId('Test2'), position: LatLng(43.281631, -0.802300))];
   
-  TextField location(BuildContext context, MapEntry<String, String> location, Function(MapEntry<String, String>) m, String labelString, var txtController) {
+  TextField location(BuildContext context, MapEntry<String, String> location, Function(MapEntry<String, String>) m) {
     return TextField(
-      controller: txtController,
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => SearchBarPageState(callback: m,),
-                  fullscreenDialog: true),
-            );
-          },
-          autofocus: false,
-          showCursor: false,
-          decoration: InputDecoration(
-              filled: true,
-              fillColor: Theme.of(context).scaffoldBackgroundColor,
-              labelText: labelString,
-              border: OutlineInputBorder()),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SearchBarPageState(callback: m,),
+            fullscreenDialog: true),
         );
+      },
+      autofocus: false,
+      showCursor: false,
+      decoration: InputDecoration(
+          hintText: location.key,
+          hintStyle: const TextStyle(
+              fontWeight: FontWeight.w500, fontSize: 24),
+          filled: true,
+          fillColor: Colors.grey[200],
+          border: InputBorder.none),
+    );
   }
 
-  Widget googleMapWidget()
-  {
-    _addMarker(const LatLng(43.3, -0.8), "Test Marker 1");
-    _addMarker(const LatLng(43.281631, -0.802300), "Test Marker 2");
-    getDirections(marks, setState);
-    return Container(height: 600, child: GoogleMap(onMapCreated: _onMapCreated, initialCameraPosition: CameraPosition(target: _center, zoom: 11.0,), markers: _markers, polylines: Set<Polyline>.of(_polylines.values)));
+  Widget googleMapWidget() {
+    return Container(
+      height: 600, 
+      margin: const EdgeInsets.all(10), 
+      child: GoogleMap(
+        onMapCreated: _onMapCreated, 
+        initialCameraPosition: CameraPosition(target: _center, zoom: 11.0,),
+        markers: {if (_startMarker!= null) _startMarker!, if (_endMarker != null) _endMarker!,}, 
+        polylines: Set<Polyline>.of(polylines.values) ,
+      )
+    );
   }
 
-  void _onMapCreated(GoogleMapController controller)
-  {
+  void _onMapCreated(GoogleMapController controller) {
     setState(() {
       mapController = controller;
     });
   }
 
-  void _addMarker(LatLng l, String markerId)
-  {
-    setState(() {
-      _markers.add(Marker(markerId: MarkerId(markerId), position: l,)); 
-    });
-  }
+  Future<void> getLatLng(MapEntry<String, String> query, bool isStart) async {
+    if (query.value.isEmpty) return;
 
-  getDirections(List<Marker> markers, newSetState) async {
-    List<LatLng> polylineCoordinates = [];
-    List<PolylineWayPoint> polylineWayPoints = [];
-    for (var i =0; i<markers.length; i++){
-      polylineWayPoints.add(PolylineWayPoint(location:
-      "${markers[i].position.latitude.toString()},${markers[i].position.longitude.toString()}", stopOver: true));
-    }
+    if (isStart && isRequestingStart) return;
+    if (!isStart && isRequestingEnd) return;
 
-    PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(api_key, PointLatLng(markers.first.position.latitude, markers.first.position.longitude), PointLatLng(markers.last.position.latitude, markers.last.position.longitude), travelMode: TravelMode.driving, wayPoints: polylineWayPoints);
-
-    if(result.points.isNotEmpty){
-      result.points.forEach((PointLatLng point){
-        polylineCoordinates.add(LatLng(point.latitude, point.longitude));
+    if (isStart) {
+      setState(() {
+        isRequestingStart = true;
       });
-    
     } else {
-      print(result.errorMessage);
+      setState(() {
+        isRequestingEnd = true;
+      });
     }
 
-    newSetState(() {});
+    final placeId = query.value;
+    final url = Uri.parse('https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$api_key');
 
-    addPolyLine(polylineCoordinates, newSetState);
+    try {
+      final response = await http.get(url);
+
+      if(response.statusCode == 200) {
+        final place = json.decode(response.body)['result'];
+        final latlng = LatLng(place['geometry']['location']['lat'], place['geometry']['location']['lng']);
+        final markerId = isStart ? 'start_marker' : 'end_marker';
+
+        setState(() {
+          if(isStart) {
+            _startMarker = Marker(markerId: MarkerId(markerId), position: latlng);
+          } else {
+            _endMarker = Marker(markerId: MarkerId(markerId), position: latlng);
+          }
+
+          if(_startMarker != null && _endMarker != null) {
+            getRoute();
+          }
+        });
+      }
+    } catch (e) {
+      // Handle errors here
+      print('Failed to fetch location details: $e');
+    } finally {
+      if (isStart) {
+        setState(() {
+          isRequestingStart = false;
+        });
+      } else {
+        setState(() {
+          isRequestingEnd = false;
+        });
+      }
+    }
   }
 
-  addPolyLine(List<LatLng> polylineCoordinates, newSetState){
-    PolylineId id = PolylineId("Poly");
-    Polyline polyline = Polyline(polylineId: id, color: Colors.blue, points: polylineCoordinates);
-    _polylines[id] = polyline;
-    newSetState((){});
-  }
+  void getRoute() async {
+    polylineCoordinates.clear();
+    polylines.clear();
+    List<LatLng> m = [];
+    ApiCall a = ApiCall();
+    List<RoutePrediction> r = await a.routeCall(startQuery.key, endQuery.key);
+    
+    setState((){});
+    r[0].points.forEach((LatLng point){
+      polylineCoordinates.add(LatLng(point.latitude, point.longitude));
+    }); 
 
+    PolylineId id = PolylineId('poly');
+    Polyline polyline = Polyline(polylineId: id,
+    color: Colors.blue, points: polylineCoordinates);
+
+    polylines[id] = polyline;
+  }
 }
-
 
 class LocationBar extends StatefulWidget {
   final ValueChanged<String> callback;
@@ -219,8 +245,7 @@ class LocationBarState extends State<LocationBar> {
     return locationBar();
   }
 
-  Widget locationBar()
-  {
+  Widget locationBar() {
     return Container(
       margin: const EdgeInsets.all(10),
       child: TextField(
@@ -229,8 +254,7 @@ class LocationBarState extends State<LocationBar> {
           border: OutlineInputBorder(),
           labelText: 'Location',
         ),
-        onChanged: (value)
-        {
+        onChanged: (value) {
           callback(value);
         },
       ),
@@ -277,20 +301,18 @@ class _SearchBarPageState extends State<SearchBarPageState> {
     );
   }
 
-  Container placesAutoComplete()
-  {
+  Container placesAutoComplete() {
     List<String> locs = httpAutocompletes.entries.map((entry) => entry.key).toList();
 
     return Container(
       margin: const EdgeInsets.all(10),
-      child: Column
-      (
+      child: Column(
         children: [
           for (String element in locs)
             Container(
               margin: const EdgeInsets.all(10), 
               child: ElevatedButton(
-                onPressed: () async{
+                onPressed: () async {
                   selected = MapEntry(element, httpAutocompletes[element].toString());
                   widget.callback(selected); Navigator.of(context).pop();
                 }, 
@@ -300,14 +322,12 @@ class _SearchBarPageState extends State<SearchBarPageState> {
     );
   }
 
-  void fetchPlacesAutcomplete(String query) async
-  {
+  void fetchPlacesAutcomplete(String query) async {
     Map<String, String> m = {};
     ApiCall a = ApiCall();
     PlacePrediction p = await a.placeCall(query, LatLng(51.5, 0.1));
 
     p.autocompletes.forEach((element) {m[element.key] = element.value; });
-
     setState(() {
       httpAutocompletes = m;
     });

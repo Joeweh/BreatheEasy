@@ -23,6 +23,31 @@ class PlacePrediction {
   }
 }
 
+
+class RoutePrediction {
+  
+  late List<LatLng> points; 
+  RoutePrediction({ required this.points});
+
+  factory RoutePrediction.fromJson(Map<String, dynamic> json){
+    var innerJson = json["polylineCoords"]; 
+    //print(innerJson);
+    late List<LatLng> factoryAuto = [];
+
+    for(var d in innerJson){
+      //print(d);
+      var latitude = d["lat"];
+      var longitude = d["long"];
+      var m = LatLng(latitude, longitude);
+      factoryAuto.add(m);
+    }
+
+    return RoutePrediction(points: factoryAuto);
+  }
+}
+
+
+
 class ApiCall {
   Future<PlacePrediction> placeCall(String query, LatLng location) async 
   {
@@ -44,6 +69,27 @@ class ApiCall {
     }
     else
     {
+      throw Exception('Failed to load post');
+    }
+  }
+
+  Future<List<RoutePrediction>> routeCall(String origin, String dest) async{
+    Map<String, dynamic> request = 
+    {
+        'origin': origin,
+        'dest': dest
+    };
+
+    final uri = Uri.parse("https://breathe-easy-server.onrender.com/api/routes");
+    final response = await http.post(uri, body: json.encode(request));
+    List<RoutePrediction> a = [];
+    if (response.statusCode == 200){
+      var t = json.decode(response.body);
+      for(var u in t){    
+        a.add(RoutePrediction.fromJson(u));
+      }
+      return a;
+    }else {
       throw Exception('Failed to load post');
     }
   }
