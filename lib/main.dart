@@ -48,6 +48,46 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
+class RoutePage extends StatefulWidget {
+  const RoutePage({
+    super.key,
+  });
+
+  @override
+  State<RoutePage> createState() => _RoutePageState();
+}
+
+class _RoutePageState extends State<RoutePage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Directions"),
+        centerTitle: true,
+        backgroundColor: Color.fromARGB(255, 2, 110, 44),
+      ),
+      body: Container(
+        alignment: Alignment.bottomCenter,
+        margin: const EdgeInsets.all(10),
+        child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Column(
+                children: [
+                ],
+              ),
+              FilledButton.tonal(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text("Exit")),
+            ]),
+      ),
+    );
+  }
+}
+
 class DirectionPage extends StatefulWidget {
   const DirectionPage({
     super.key,
@@ -231,7 +271,14 @@ class _DirectionPageState extends State<DirectionPage> {
                               )),
                               Expanded(
                                   child: FilledButton(
-                                      onPressed: () {},
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => RoutePage(),
+                                            fullscreenDialog: true),
+                                        );
+                                      },
                                       child: Text("Start Route"))),
                             ],
                           ),
@@ -255,6 +302,7 @@ class _DirectionPageState extends State<DirectionPage> {
       var txtController) {
     return TextField(
       controller: txtController,
+      readOnly: true,
       onTap: () {
         Navigator.push(
           context,
