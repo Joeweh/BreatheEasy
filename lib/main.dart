@@ -57,7 +57,52 @@ class RoutePage extends StatefulWidget {
   State<RoutePage> createState() => _RoutePageState();
 }
 
+class ListViewDirection extends StatefulWidget {  
+  // Example list of items
+  final List<String> items;
+
+    const ListViewDirection(
+      {super.key, required this.items});
+
+  @override
+  State<ListViewDirection> createState() => ListViewState();
+}
+
+class ListViewState extends State<ListViewDirection> {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        margin: const EdgeInsets.all(10),
+        child: Column(
+          children: [
+            for (String element in widget.items)
+              Container(
+                margin: EdgeInsets.symmetric(vertical: 10),
+                child: ListTile(
+                  title: Text(element),
+                  tileColor:
+                      Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+                ),
+              ),
+          ],
+        ));
+  }
+}
+
 class _RoutePageState extends State<RoutePage> {
+  List<String> items = [
+    'Item 1',
+    'Item 2',
+    'Item 3',
+    'Item 4',
+    'Item 5',
+    'Item 6',
+  ];
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -73,10 +118,7 @@ class _RoutePageState extends State<RoutePage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Column(
-                children: [
-                ],
-              ),
+              ListViewDirection(items: items,),
               FilledButton.tonal(
                   onPressed: () {
                     Navigator.of(context).pop();
