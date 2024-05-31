@@ -4,8 +4,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:breathe_easy/api.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:location/location.dart';
 
 void main() async {
@@ -336,13 +334,23 @@ class _DirectionPageState extends State<DirectionPage> {
       controller: txtController,
       readOnly: true,
       onTap: () async {
-        Navigator.push(
+        var locationSelection = await Navigator.push(
           context,
           MaterialPageRoute(
               builder: (context) =>
                   SearchBarPageState(callback: m, location: _center),
               fullscreenDialog: true),
         );
+
+        mapController.animateCamera(CameraUpdate.newLatLngZoom(
+            LatLng(locationSelection.latitude as double,
+                locationSelection.longitude as double),
+            13));
+
+        LatLng l = LatLng(locationSelection.latitude as double,
+            locationSelection.longitude as double);
+
+        _center = l;
       },
       autofocus: false,
       showCursor: false,
@@ -512,7 +520,7 @@ class SearchBarPageState extends StatefulWidget {
 }
 
 class _SearchBarPageState extends State<SearchBarPageState> {
-  Map<String, String> httpAutocompletes = {};
+  Map<String, LatLng> httpAutocompletes = {};
   Map<ElevatedButton, Map<String, String>> autoList = {};
 
   MapEntry<String, String> selected = MapEntry("", "");
@@ -562,7 +570,7 @@ class _SearchBarPageState extends State<SearchBarPageState> {
                     selected = MapEntry(
                         element, httpAutocompletes[element].toString());
                     widget.callback(selected);
-                    Navigator.of(context).pop();
+                    Navigator.of(context).pop(httpAutocompletes[element]);
                   },
                   tileColor:
                       Theme.of(context).colorScheme.primary.withOpacity(0.1),
@@ -577,7 +585,7 @@ class _SearchBarPageState extends State<SearchBarPageState> {
   }
 
   void fetchPlacesAutcomplete(String query) async {
-    Map<String, String> m = {};
+    Map<String, LatLng> m = {};
     ApiCall a = ApiCall();
     PlacePrediction p = await a.placeCall(query, widget.location);
 

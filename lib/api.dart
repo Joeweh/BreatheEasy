@@ -6,17 +6,17 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 
 class PlacePrediction {
-  late List<MapEntry<String, String>> autocompletes;
+  late List<MapEntry<String, LatLng>> autocompletes;
 
   PlacePrediction({required this.autocompletes});
 
   factory PlacePrediction.fromJson(var json) {
     var innerJson = json;
-    late List<MapEntry<String, String>> factoryAuto = [];
+    late List<MapEntry<String, LatLng>> factoryAuto = [];
 
     for (dynamic d in innerJson) {
-      MapEntry<String, String> m =
-          MapEntry(d["name"] + " - " + d["address"], 'placeholder');
+      MapEntry<String, LatLng> m =
+          MapEntry(d["name"] + " - " + d["address"], LatLng(d['location']['lat'], d['location']['long']));
       factoryAuto.add(m);
     }
 
