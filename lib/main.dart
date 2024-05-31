@@ -428,7 +428,6 @@ Text formatAQ(double aq) {
   }
 
   void askForLocation() async {
-    print('called');
     var location = Location();
 
     var serviceEnabled = await location.serviceEnabled();
@@ -478,6 +477,7 @@ Text formatAQ(double aq) {
     polylines.clear();
     ApiCall a = ApiCall();
     routes = await a.routeCall(startQuery.key, endQuery.key);
+    routes.sort((a, b) => a.airScore.compareTo(b.airScore));
 
     setNumRoutes(routes.length);
     setEst(routes[curRoute].durationMinutes.truncate());
