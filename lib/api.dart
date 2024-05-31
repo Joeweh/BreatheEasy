@@ -1,21 +1,22 @@
-// TODO: Implement API Class from what Joey 
+// TODO: Implement API Class from what Joey
 import 'dart:convert';
-import 'dart:js';
+//import 'dart:js';
+import 'package:breathe_easy/utils.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 
 class PlacePrediction {
   late List<MapEntry<String, String>> autocompletes;
 
-  PlacePrediction({ required this.autocompletes });
+  PlacePrediction({required this.autocompletes});
 
   factory PlacePrediction.fromJson(var json) {
     var innerJson = json;
     late List<MapEntry<String, String>> factoryAuto = [];
 
-    for (dynamic d in innerJson)
-    {
-      MapEntry<String, String> m = MapEntry(d["name"] + " - " + d["address"], d["id"]);
+    for (dynamic d in innerJson) {
+      MapEntry<String, String> m =
+          MapEntry(d["name"] + " - " + d["address"], 'placeholder');
       factoryAuto.add(m);
     }
 
@@ -23,18 +24,26 @@ class PlacePrediction {
   }
 }
 
-
 class RoutePrediction {
-  
-  late List<LatLng> points; 
-  RoutePrediction({ required this.points});
+  late List<LatLng> points;
+  late List<NavInstruction> instructions;
+  late double airScore;
+  late double distanceMiles;
+  late double durationMinutes;
 
-  factory RoutePrediction.fromJson(Map<String, dynamic> json){
-    var innerJson = json["polylineCoords"]; 
+  RoutePrediction(
+      {required this.points,
+      required this.instructions,
+      required this.airScore,
+      required this.distanceMiles,
+      required this.durationMinutes});
+
+  factory RoutePrediction.fromJson(Map<String, dynamic> json) {
+    var innerJson = json["polylineCoords"];
     //print(innerJson);
     late List<LatLng> factoryAuto = [];
 
-    for(var d in innerJson){
+    for (var d in innerJson) {
       //print(d);
       var latitude = d["lat"];
       var longitude = d["long"];
@@ -42,55 +51,56 @@ class RoutePrediction {
       factoryAuto.add(m);
     }
 
-    return RoutePrediction(points: factoryAuto);
+    List<NavInstruction> instructions = [];
+
+    for (var i in json['navInstructions']) {
+      NavInstruction instruction =
+          NavInstruction(maneuver: i['maneuver'], text: i['text']);
+
+      instructions.add(instruction);
+    }
+
+    return RoutePrediction(
+        airScore: json['airScore'],
+        instructions: instructions,
+        points: factoryAuto,
+        distanceMiles: json['distanceMiles'],
+        durationMinutes: json['durationMinutes']);
   }
 }
 
-
-
 class ApiCall {
-  Future<PlacePrediction> placeCall(String query, LatLng location) async 
-  {
-    Map<String, dynamic> request = 
-    {
+  Future<PlacePrediction> placeCall(String query, LatLng location) async {
+    Map<String, dynamic> request = {
       'query': query,
-      'location': {
-        'lat': location.latitude,
-        'long': location.longitude
-      }
+      'location': {'lat': location.latitude, 'long': location.longitude}
     };
 
-    final uri = Uri.parse("https://breathe-easy-server.onrender.com/api/places");
+    final uri =
+        Uri.parse("https://breathe-easy-server.onrender.com/api/places");
     final response = await http.post(uri, body: json.encode(request));
 
-    if (response.statusCode == 200)
-    {
+    if (response.statusCode == 200) {
       return PlacePrediction.fromJson(json.decode(response.body));
-    }
-    else
-    {
+    } else {
       throw Exception('Failed to load post');
     }
   }
 
-  Future<List<RoutePrediction>> routeCall(String origin, String dest) async{
-    Map<String, dynamic> request = 
-    {
-        'origin': origin,
-        'dest': dest,
-        'avoidOutliers': true,
-    };
+  Future<List<RoutePrediction>> routeCall(String origin, String dest) async {
+    Map<String, dynamic> request = {'origin': origin, 'dest': dest};
 
-    final uri = Uri.parse("https://breathe-easy-server.onrender.com/api/routes");
+    final uri =
+        Uri.parse("https://breathe-easy-server.onrender.com/api/routes");
     final response = await http.post(uri, body: json.encode(request));
     List<RoutePrediction> a = [];
-    if (response.statusCode == 200){
+    if (response.statusCode == 200) {
       var t = json.decode(response.body);
-      for(var u in t){    
+      for (var u in t) {
         a.add(RoutePrediction.fromJson(u));
       }
       return a;
-    }else {
+    } else {
       throw Exception('Failed to load post');
     }
   }

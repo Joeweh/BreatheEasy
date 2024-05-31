@@ -1,5 +1,4 @@
-import 'dart:html';
-
+import 'package:breathe_easy/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -49,60 +48,15 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class RoutePage extends StatefulWidget {
-  const RoutePage({
-    super.key,
-  });
+  final List<NavInstruction> instructions;
+
+  const RoutePage({super.key, required this.instructions});
 
   @override
   State<RoutePage> createState() => _RoutePageState();
 }
 
-class ListViewDirection extends StatefulWidget {  
-  // Example list of items
-  final List<String> items;
-
-    const ListViewDirection(
-      {super.key, required this.items});
-
-  @override
-  State<ListViewDirection> createState() => ListViewState();
-}
-
-class ListViewState extends State<ListViewDirection> {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-        margin: const EdgeInsets.all(10),
-        child: Column(
-          children: [
-            for (String element in widget.items)
-              Container(
-                margin: EdgeInsets.symmetric(vertical: 10),
-                child: ListTile(
-                  title: Text(element),
-                  tileColor:
-                      Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
-                ),
-              ),
-          ],
-        ));
-  }
-}
-
 class _RoutePageState extends State<RoutePage> {
-  List<String> items = [
-    'Item 1',
-    'Item 2',
-    'Item 3',
-    'Item 4',
-    'Item 5',
-    'Item 6',
-  ];
-  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -118,7 +72,14 @@ class _RoutePageState extends State<RoutePage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              ListViewDirection(items: items,),
+              ListView.builder(
+                itemBuilder: (BuildContext context, int index) {
+                return Card(
+                  child: Text(widget.instructions[index].text),
+                );
+              },
+                itemCount: widget.instructions.length,
+              ),
               FilledButton.tonal(
                   onPressed: () {
                     Navigator.of(context).pop();
@@ -140,14 +101,14 @@ class DirectionPage extends StatefulWidget {
 }
 
 class _DirectionPageState extends State<DirectionPage> {
-  int aq = 0;
+  double aq = 0;
   int miles = 0;
 
   // in minutes
   int est = 0;
 
   late GoogleMapController mapController;
-  Marker? _startMarker; 
+  Marker? _startMarker;
   Marker? _endMarker;
   var api_key = (dotenv.env['MAPS_API_KEY']).toString();
   MapEntry<String, String> startQuery = MapEntry("Origin", "");
@@ -155,7 +116,8 @@ class _DirectionPageState extends State<DirectionPage> {
   var originTextField = TextEditingController();
   var destinationTextField = TextEditingController();
   double numRoutes = 5; // Test Num
-  double curRoute = 0;
+  int curRoute = 0;
+  late List<RoutePrediction> routes;
 
   bool isRequestingStart = false;
   bool isRequestingEnd = false;
@@ -167,55 +129,60 @@ class _DirectionPageState extends State<DirectionPage> {
   LatLng _center = const LatLng(43.281631, -0.802300);
 
   bool noSpikes = false;
-  void setNumRoutes(double x){
-    numRoutes = x;
+  void setNumRoutes(int x) {
+    numRoutes = x as double;
   }
 
-  double getNumRoutes(){
+  double getNumRoutes() {
     return numRoutes;
   }
 
-  void setAQ(int x){
+  void setAQ(double x) {
     aq = x;
   }
 
-  int getAQ(){
+  double getAQ() {
     return aq;
   }
 
-  void setMiles(int x){
+  void setMiles(int x) {
     miles = x;
   }
 
-  int getMiles(){
+  int getMiles() {
     return miles;
   }
 
-  void setEst(int x){
+  void setEst(int x) {
     est = x;
   }
 
-  int getEst(){
+  int getEst() {
     return est;
   }
 
-  void setStartQuery(MapEntry<String, String> s) {
+  void setStartQuery(MapEntry<String, String> s) async {
     if (s.value != "") {
       setState(() {
         startQuery = s;
         originTextField.text = s.key;
       });
-      getLatLng(s, true);
+
+      if(endQuery.key != "Destination"){
+        await getRoute();
+      }
     }
   }
 
-  void setEndQuery(MapEntry<String, String> s) {
+  void setEndQuery(MapEntry<String, String> s) async {
     if (s.value != "") {
       setState(() {
         endQuery = s;
         destinationTextField.text = s.key;
       });
-      getLatLng(s, false);
+      if(startQuery.key != "Origin"){
+        await getRoute();
+      }
     }
   }
 
@@ -223,17 +190,23 @@ class _DirectionPageState extends State<DirectionPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(startQuery.value != "" && endQuery.value != "" ? "EST:" + est.toString() : ""),
+        title: Text(startQuery.value != "" && endQuery.value != ""
+            ? "EST:" + est.toString()
+            : ""),
         actions: [
           Row(
             children: [
               Padding(
                 padding: EdgeInsets.all(10.0),
-                child: Text(startQuery.value != "" && endQuery.value != "" ? "AQ:" + aq.toString() : ""),
+                child: Text(startQuery.value != "" && endQuery.value != ""
+                    ? "AQ:" + aq.toString()
+                    : ""),
               ),
               Padding(
                 padding: EdgeInsets.all(10.0),
-                child: Text(startQuery.value != "" && endQuery.value != "" ? "MILES:" + miles.toString() : ""),
+                child: Text(startQuery.value != "" && endQuery.value != ""
+                    ? "MILES:" + miles.toString()
+                    : ""),
               )
             ],
           )
@@ -253,15 +226,18 @@ class _DirectionPageState extends State<DirectionPage> {
                 title: Row(
               children: [
                 Text("No Spikes in AQ: "),
-                Transform.scale(scale: 0.8, child: Switch(
-                  value: noSpikes,
-                  onChanged: ((bool value) {
-                    setState(() {
-                      noSpikes = value;
-                    });
-                  }),
-                  activeColor: Colors.green,
-                ),)
+                Transform.scale(
+                  scale: 0.8,
+                  child: Switch(
+                    value: noSpikes,
+                    onChanged: ((bool value) {
+                      setState(() {
+                        noSpikes = value;
+                      });
+                    }),
+                    activeColor: Colors.green,
+                  ),
+                )
               ],
             )),
           ],
@@ -298,15 +274,22 @@ class _DirectionPageState extends State<DirectionPage> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              Text("Route #: "),
+                              const Text("Route #: "),
                               Expanded(
                                   child: Slider(
-                                value: curRoute,
+                                value: curRoute as double,
                                 max: numRoutes - 1,
-                                divisions: (numRoutes as int) - 1,
+                                divisions: (numRoutes).truncate(),
                                 onChanged: (double value) {
                                   setState(() {
-                                    curRoute = value;
+                                    setEst(routes[curRoute].durationMinutes.truncate());
+                                    setMiles(routes[curRoute].distanceMiles.truncate());
+                                    setAQ(routes[curRoute].airScore);
+                                    curRoute = value.truncate();
+                                    polylineCoordinates.clear();
+                                    routes[curRoute].points.forEach((LatLng point) {
+                                      polylineCoordinates.add(LatLng(point.latitude, point.longitude));
+                                    });
                                   });
                                 },
                                 label: (curRoute + 1).round().toString(),
@@ -317,11 +300,16 @@ class _DirectionPageState extends State<DirectionPage> {
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                            builder: (context) => RoutePage(),
-                                            fullscreenDialog: true),
+                                              builder: (context) {
+                                                return RoutePage(
+                                                  instructions: routes[curRoute]
+                                                      .instructions,
+                                                );
+                                              },
+                                              fullscreenDialog: true),
                                         );
                                       },
-                                      child: Text("Start Route"))),
+                                      child: const Text("Start Route"))),
                             ],
                           ),
                         ],
@@ -335,7 +323,7 @@ class _DirectionPageState extends State<DirectionPage> {
       ),
     );
   }
-  
+
   TextField location(
       BuildContext context,
       MapEntry<String, String> location,
@@ -345,36 +333,42 @@ class _DirectionPageState extends State<DirectionPage> {
     return TextField(
       controller: txtController,
       readOnly: true,
-      onTap: () {
+      onTap: () async {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => SearchBarPageState(callback: m, location: _center),
-            fullscreenDialog: true),
+              builder: (context) =>
+                  SearchBarPageState(callback: m, location: _center),
+              fullscreenDialog: true),
         );
       },
       autofocus: false,
       showCursor: false,
       decoration: InputDecoration(
           hintText: location.key,
-          hintStyle: const TextStyle(
-              fontWeight: FontWeight.w500, fontSize: 24),
+          hintStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 24),
           filled: true,
           fillColor: Colors.grey[200],
           border: InputBorder.none),
     );
   }
 
-
   Widget googleMapWidget(BuildContext context) {
     askForLocation();
 
     return Container(
         child: GoogleMap(
-        onMapCreated: _onMapCreated, 
-        initialCameraPosition: CameraPosition(target: _center, zoom: 11.0,),
-        markers: {if (_startMarker!= null) _startMarker!, if (_endMarker != null) _endMarker!,}, 
-        polylines: Set<Polyline>.of(polylines.values) ,));
+      onMapCreated: _onMapCreated,
+      initialCameraPosition: CameraPosition(
+        target: _center,
+        zoom: 11.0,
+      ),
+      markers: {
+        if (_startMarker != null) _startMarker!,
+        if (_endMarker != null) _endMarker!,
+      },
+      polylines: Set<Polyline>.of(polylines.values),
+    ));
   }
 
   void askForLocation() async {
@@ -414,8 +408,6 @@ class _DirectionPageState extends State<DirectionPage> {
           currentLocation.longitude as double);
 
       _center = l;
-      print(_center.latitude);
-      print(_center.longitude);
     });
   }
 
@@ -441,64 +433,33 @@ class _DirectionPageState extends State<DirectionPage> {
       });
     }
 
-    if(startQuery != null && endQuery != null){
-      getRoute();
-    }
-
-    final placeId = query.value;
-    final url = Uri.parse('https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$api_key');
-
-    try {
-      final response = await http.get(url);
-
-      if(response.statusCode == 200) {
-        final place = json.decode(response.body)['result'];
-        final markerId = isStart ? 'start_marker' : 'end_marker';
-
-        setState(() {
-          if(isStart) {
-            _startMarker = Marker(markerId: MarkerId(markerId), position: polylineCoordinates.first);
-          } else {
-            _endMarker = Marker(markerId: MarkerId(markerId), position: polylineCoordinates.last);
-          }
-
-          if(_startMarker != null && _endMarker != null) {
-            getRoute();
-          }
-        });
-      }
-    } catch (e) {
-      // Handle errors here
-      print('Failed to fetch location details: $e');
-    } finally {
-      if (isStart) {
-        setState(() {
-          isRequestingStart = false;
-        });
-      } else {
-        setState(() {
-          isRequestingEnd = false;
-        });
-      }
+    if (startQuery.key != "Origin" && endQuery.key != "Destination") {
+      await getRoute();
     }
   }
 
-  void getRoute() async {
+  Future<void> getRoute() async {
     polylineCoordinates.clear();
+    setState(() {
+      curRoute = 0;
+    });
     polylines.clear();
-    List<LatLng> m = [];
     ApiCall a = ApiCall();
-    List<RoutePrediction> r = await a.routeCall(startQuery.key, endQuery.key);
-    
-    setState((){});
-    r[0].points.forEach((LatLng point){
+    routes = await a.routeCall(startQuery.key, endQuery.key);
+
+    setNumRoutes(routes.length);
+    setEst(routes[curRoute].durationMinutes.truncate());
+    setMiles(routes[curRoute].distanceMiles.truncate());
+    setAQ(routes[curRoute].airScore);
+
+    setState(() {});
+    routes[curRoute].points.forEach((LatLng point) {
       polylineCoordinates.add(LatLng(point.latitude, point.longitude));
-    }); 
+    });
 
     PolylineId id = PolylineId('poly');
-    Polyline polyline = Polyline(polylineId: id,
-    color: Colors.blue, points: polylineCoordinates);
-
+    Polyline polyline = Polyline(
+        polylineId: id, color: Colors.blue, points: polylineCoordinates);
     polylines[id] = polyline;
   }
 }
