@@ -78,13 +78,13 @@ class _RoutePageState extends State<RoutePage> {
                     scrollDirection: Axis.vertical,
                     shrinkWrap: true,
                     itemBuilder: (BuildContext context, int index) {
-                    return Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(widget.instructions[index].text),
-                      ),
-                    );
-                  },
+                      return Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(widget.instructions[index].text),
+                        ),
+                      );
+                    },
                     itemCount: widget.instructions.length,
                   ),
                 ),
@@ -127,6 +127,8 @@ class _DirectionPageState extends State<DirectionPage> {
   double numRoutes = 5; // Test Num
   int curRoute = 0;
   late List<RoutePrediction> routes;
+
+  bool routeDisplayed = false;
 
   bool isRequestingStart = false;
   bool isRequestingEnd = false;
@@ -175,9 +177,10 @@ class _DirectionPageState extends State<DirectionPage> {
       setState(() {
         startQuery = s;
         originTextField.text = s.key;
+        routeDisplayed = false;
       });
 
-      if(endQuery.key != "Destination"){
+      if (endQuery.key != "Destination") {
         await getRoute();
       }
     }
@@ -188,8 +191,9 @@ class _DirectionPageState extends State<DirectionPage> {
       setState(() {
         endQuery = s;
         destinationTextField.text = s.key;
+        routeDisplayed = false;
       });
-      if(startQuery.key != "Origin"){
+      if (startQuery.key != "Origin") {
         await getRoute();
       }
     }
@@ -291,13 +295,20 @@ class _DirectionPageState extends State<DirectionPage> {
                                 divisions: (numRoutes).truncate(),
                                 onChanged: (double value) {
                                   setState(() {
-                                    setEst(routes[curRoute].durationMinutes.truncate());
-                                    setMiles(routes[curRoute].distanceMiles.truncate());
+                                    setEst(routes[curRoute]
+                                        .durationMinutes
+                                        .truncate());
+                                    setMiles(routes[curRoute]
+                                        .distanceMiles
+                                        .truncate());
                                     setAQ(routes[curRoute].airScore);
                                     curRoute = value.truncate();
                                     polylineCoordinates.clear();
-                                    routes[curRoute].points.forEach((LatLng point) {
-                                      polylineCoordinates.add(LatLng(point.latitude, point.longitude));
+                                    routes[curRoute]
+                                        .points
+                                        .forEach((LatLng point) {
+                                      polylineCoordinates.add(LatLng(
+                                          point.latitude, point.longitude));
                                     });
                                   });
                                 },
@@ -305,20 +316,26 @@ class _DirectionPageState extends State<DirectionPage> {
                               )),
                               Expanded(
                                   child: FilledButton(
-                                      onPressed: () {
+                                onPressed: routeDisplayed
+                                    ? () {
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                              builder: (context) {
-                                                return RoutePage(
-                                                  instructions: routes[curRoute]
-                                                      .instructions,
-                                                );
-                                              },
-                                              fullscreenDialog: true),
+                                            builder: (context) {
+                                              return RoutePage(
+                                                instructions: routes[curRoute]
+                                                    .instructions,
+                                              );
+                                            },
+                                            fullscreenDialog: true,
+                                          ),
                                         );
-                                      },
-                                      child: const Text("Start Route"))),
+                                      }
+                                    : null,
+                                child: Text(routeDisplayed
+                                    ? "Start Route"
+                                    : "Loading..."),
+                              )),
                             ],
                           ),
                         ],
@@ -420,11 +437,11 @@ class _DirectionPageState extends State<DirectionPage> {
     // update variables when location changes
     mapController.animateCamera(CameraUpdate.newLatLngZoom(
         LatLng(currentLocation.latitude as double,
-              currentLocation.longitude as double),
-          13));
+            currentLocation.longitude as double),
+        13));
 
-      LatLng l = LatLng(currentLocation.latitude as double,
-          currentLocation.longitude as double);
+    LatLng l = LatLng(currentLocation.latitude as double,
+        currentLocation.longitude as double);
 
     _center = l;
   }
@@ -479,6 +496,10 @@ class _DirectionPageState extends State<DirectionPage> {
     Polyline polyline = Polyline(
         polylineId: id, color: Colors.blue, points: polylineCoordinates);
     polylines[id] = polyline;
+
+    setState(() {
+      routeDisplayed = true;
+    });
   }
 }
 
