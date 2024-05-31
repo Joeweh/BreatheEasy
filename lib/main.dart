@@ -498,6 +498,9 @@ Text formatAQ(double aq) {
     routes[curRoute].points.forEach((LatLng point) {
       polylineCoordinates.add(LatLng(point.latitude, point.longitude));
     });
+    
+    _startMarker = Marker(markerId: MarkerId('start'), position: polylineCoordinates.first);
+    _endMarker = Marker(markerId: MarkerId('end'), position: polylineCoordinates.last);
 
     PolylineId id = PolylineId('poly');
     Polyline polyline = Polyline(
