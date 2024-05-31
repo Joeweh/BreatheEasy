@@ -381,11 +381,10 @@ class _DirectionPageState extends State<DirectionPage> {
       autofocus: false,
       showCursor: false,
       decoration: InputDecoration(
-          hintText: location.key,
-          hintStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 24),
           filled: true,
-          fillColor: Colors.grey[200],
-          border: InputBorder.none),
+          fillColor: Theme.of(context).scaffoldBackgroundColor,
+          labelText: labelString,
+          border: OutlineInputBorder()),
     );
   }
 
