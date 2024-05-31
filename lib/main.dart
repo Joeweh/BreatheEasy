@@ -73,6 +73,8 @@ class _RoutePageState extends State<RoutePage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               ListView.builder(
+                scrollDirection: Axis.vertical,
+                shrinkWrap: true,
                 itemBuilder: (BuildContext context, int index) {
                 return Card(
                   child: Text(widget.instructions[index].text),
