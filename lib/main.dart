@@ -121,8 +121,8 @@ class _DirectionPageState extends State<DirectionPage> {
   Marker? _startMarker;
   Marker? _endMarker;
   var api_key = (dotenv.env['MAPS_API_KEY']).toString();
-  MapEntry<String, String> startQuery = MapEntry("Origin", "");
-  MapEntry<String, String> endQuery = MapEntry("Destination", "");
+  MapEntry<String, String> startQuery = MapEntry("", "");
+  MapEntry<String, String> endQuery = MapEntry("", "");
   var originTextField = TextEditingController();
   var destinationTextField = TextEditingController();
   double numRoutes = 5; // Test Num
@@ -138,7 +138,10 @@ class _DirectionPageState extends State<DirectionPage> {
   List<LatLng> polylineCoordinates = [];
   PolylinePoints polylinePoints = PolylinePoints();
 
-  LatLng _center = const LatLng(43.281631, -0.802300);
+
+
+  LatLng _center = LatLng(43.281631, -0.802300);
+  //CameraPosition pos = CameraPosition(target: _center);
 
   bool noSpikes = false;
   void setNumRoutes(int x) {
@@ -215,30 +218,30 @@ class _DirectionPageState extends State<DirectionPage> {
   }
 
 Text formatAQ(double aq) {
-  if (aq > 0.8) {
+  if (aq <= 1.0) {
+    return const Text(
+      'Great Air Quality',
+      style: TextStyle(
+        color: Colors.white,
+      ),
+    );
+  } else if (aq < 3.0) {
     return const Text(
       'Good Air Quality',
       style: TextStyle(
         color: Colors.white,
       ),
     );
-  } else if (aq >= 0.5 && aq <= 0.8) {
+  } else if (aq < 5.0) {
     return const Text(
-      'Above Average Air Quality',
-      style: TextStyle(
-        color: Colors.white,
-      ),
-    );
-  } else if (aq >= 0.25 && aq < 0.5) {
-    return const Text(
-      'Below Average Air Quality',
+      'Bad Air Quality',
       style: TextStyle(
         color: Colors.orange,
       ),
     );
   } else {
     return const Text(
-      'Bad Air Quality',
+      'Terrible Air Quality',
       style: TextStyle(
         color: Colors.red,
       ),
@@ -271,35 +274,6 @@ Text formatAQ(double aq) {
         ],
         centerTitle: true,
         backgroundColor: Color.fromARGB(255, 2, 110, 44),
-      ),
-      drawer: Drawer(
-        child: ListView(
-          // Important: Remove any padding from the ListView.
-          padding: EdgeInsets.zero,
-          children: [
-            ListTile(
-              title: const Text("BreatheEasy"),
-            ),
-            ListTile(
-                title: Row(
-              children: [
-                Text("No Spikes in AQ: "),
-                Transform.scale(
-                  scale: 0.8,
-                  child: Switch(
-                    value: noSpikes,
-                    onChanged: ((bool value) {
-                      setState(() {
-                        noSpikes = value;
-                      });
-                    }),
-                    activeColor: Colors.green,
-                  ),
-                )
-              ],
-            )),
-          ],
-        ),
       ),
       body: Container(
         child: Column(
@@ -413,15 +387,25 @@ Text formatAQ(double aq) {
               fullscreenDialog: true),
         );
 
-        mapController.animateCamera(CameraUpdate.newLatLngZoom(
-            LatLng(locationSelection.latitude as double,
-                locationSelection.longitude as double),
-            13));
+        print('sel: $locationSelection');
 
-        LatLng l = LatLng(locationSelection.latitude as double,
-            locationSelection.longitude as double);
+        print('funni');
 
-        _center = l;
+
+          await mapController.moveCamera(CameraUpdate.newLatLngZoom(
+              const LatLng(51.5, -0.118),
+              13));
+
+          LatLng l = LatLng(locationSelection.latitude as double,
+              locationSelection.longitude as double);
+
+          setState(() {
+            _center = l;
+          });
+          print(_center);
+
+
+        print('l');
       },
       autofocus: false,
       showCursor: false,
@@ -479,7 +463,7 @@ Text formatAQ(double aq) {
     var currentLocation = await location.getLocation();
 
     // update variables when location changes
-    mapController.animateCamera(CameraUpdate.newLatLngZoom(
+    await mapController.animateCamera(CameraUpdate.newLatLngZoom(
         LatLng(currentLocation.latitude as double,
             currentLocation.longitude as double),
         13));
@@ -494,27 +478,6 @@ Text formatAQ(double aq) {
     setState(() {
       mapController = controller;
     });
-  }
-
-  Future<void> getLatLng(MapEntry<String, String> query, bool isStart) async {
-    if (query.value.isEmpty) return;
-
-    if (isStart && isRequestingStart) return;
-    if (!isStart && isRequestingEnd) return;
-
-    if (isStart) {
-      setState(() {
-        isRequestingStart = true;
-      });
-    } else {
-      setState(() {
-        isRequestingEnd = true;
-      });
-    }
-
-    if (startQuery.key != "Origin" && endQuery.key != "Destination") {
-      await getRoute();
-    }
   }
 
   Future<void> getRoute() async {
@@ -617,8 +580,8 @@ class _SearchBarPageState extends State<SearchBarPageState> {
                 ],
               ),
               FilledButton.tonal(
-                  onPressed: () {
-                    widget.callback(MapEntry("", ""));
+                  onPressed: () async {
+                    widget.callback(const MapEntry("", ""));
                     Navigator.of(context).pop();
                   },
                   child: const Text("Exit")),
