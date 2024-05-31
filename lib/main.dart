@@ -204,7 +204,7 @@ class _DirectionPageState extends State<DirectionPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(startQuery.value != "" && endQuery.value != ""
-            ? "EST:" + est.toString()
+            && routeDisplayed ? "EST:" + est.toString()
             : ""),
         actions: [
           Row(
@@ -212,13 +212,13 @@ class _DirectionPageState extends State<DirectionPage> {
               Padding(
                 padding: EdgeInsets.all(10.0),
                 child: Text(startQuery.value != "" && endQuery.value != ""
-                    ? "AQ:" + aq.toString()
+                    && routeDisplayed ? "AQ:" + aq.toString()
                     : ""),
               ),
               Padding(
                 padding: EdgeInsets.all(10.0),
                 child: Text(startQuery.value != "" && endQuery.value != ""
-                    ? "MILES:" + miles.toString()
+                    && routeDisplayed ? "MILES:" + miles.toString()
                     : ""),
               )
             ],
