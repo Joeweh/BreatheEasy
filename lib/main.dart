@@ -350,9 +350,7 @@ Text formatAQ(double aq) {
                                         );
                                       }
                                     : null,
-                                child: Text(routeDisplayed
-                                    ? "Start Route"
-                                    : "Loading..."),
+                                child: routeDisplayed ? const Text('Start Route') : Transform.scale(scale: 0.5, child: const CircularProgressIndicator(color: Colors.green)),
                               )),
                             ],
                           ),
