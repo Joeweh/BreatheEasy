@@ -141,7 +141,6 @@ class _DirectionPageState extends State<DirectionPage> {
 
 
   LatLng _center = LatLng(43.281631, -0.802300);
-  //CameraPosition pos = CameraPosition(target: _center);
 
   bool noSpikes = false;
   void setNumRoutes(int x) {
@@ -387,11 +386,6 @@ Text formatAQ(double aq) {
               fullscreenDialog: true),
         );
 
-        print('sel: $locationSelection');
-
-        print('funni');
-
-
           await mapController.moveCamera(CameraUpdate.newLatLngZoom(
               const LatLng(51.5, -0.118),
               13));
@@ -402,10 +396,6 @@ Text formatAQ(double aq) {
           setState(() {
             _center = l;
           });
-          print(_center);
-
-
-        print('l');
       },
       autofocus: false,
       showCursor: false,
@@ -438,15 +428,13 @@ Text formatAQ(double aq) {
   void askForLocation() async {
     var location = Location();
 
-    // blah blah blah please give me your location
     var serviceEnabled = await location.serviceEnabled();
 
     if (!serviceEnabled) {
       serviceEnabled = await location.requestService();
 
       if (!serviceEnabled) {
-        print('location not allowed');
-        return;
+        throw Exception('location not allowed');
       }
     }
 
@@ -455,8 +443,7 @@ Text formatAQ(double aq) {
     if (permissionGranted == PermissionStatus.denied) {
       permissionGranted = await location.requestPermission();
       if (permissionGranted != PermissionStatus.granted) {
-        print('location permission denied');
-        return;
+        throw Exception('location permission denied');
       }
     }
 
