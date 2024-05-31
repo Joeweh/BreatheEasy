@@ -398,19 +398,18 @@ class _DirectionPageState extends State<DirectionPage> {
       }
     }
 
-    // listens for changes in user's location
-    location.onLocationChanged.listen((LocationData currentLocation) {
-      // update variables when location changes
-      mapController.animateCamera(CameraUpdate.newLatLngZoom(
-          LatLng(currentLocation.latitude as double,
+    var currentLocation = await location.getLocation();
+
+    // update variables when location changes
+    mapController.animateCamera(CameraUpdate.newLatLngZoom(
+        LatLng(currentLocation.latitude as double,
               currentLocation.longitude as double),
           13));
 
       LatLng l = LatLng(currentLocation.latitude as double,
           currentLocation.longitude as double);
 
-      _center = l;
-    });
+    _center = l;
   }
 
   void _onMapCreated(GoogleMapController controller) {
