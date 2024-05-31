@@ -378,7 +378,7 @@ Text formatAQ(double aq) {
       controller: txtController,
       readOnly: true,
       onTap: () async {
-        var locationSelection = await Navigator.push(
+        var locationSelection = await Navigator.push<LatLng>(
           context,
           MaterialPageRoute(
               builder: (context) =>
@@ -387,7 +387,7 @@ Text formatAQ(double aq) {
         );
 
           await mapController.moveCamera(CameraUpdate.newLatLngZoom(
-              const LatLng(51.5, -0.118),
+              LatLng(locationSelection!.latitude, locationSelection.longitude),
               13));
 
           LatLng l = LatLng(locationSelection.latitude as double,
@@ -408,7 +408,9 @@ Text formatAQ(double aq) {
   }
 
   Widget googleMapWidget(BuildContext context) {
-    askForLocation();
+    if (startQuery.key == '' && endQuery.key == '') {
+      askForLocation();
+    }
 
     return Container(
         child: GoogleMap(
@@ -426,6 +428,7 @@ Text formatAQ(double aq) {
   }
 
   void askForLocation() async {
+    print('called');
     var location = Location();
 
     var serviceEnabled = await location.serviceEnabled();
