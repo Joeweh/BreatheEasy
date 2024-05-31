@@ -1,5 +1,6 @@
 import 'package:breathe_easy/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
@@ -70,15 +71,23 @@ class _RoutePageState extends State<RoutePage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              ListView.builder(
-                scrollDirection: Axis.vertical,
-                shrinkWrap: true,
-                itemBuilder: (BuildContext context, int index) {
-                return Card(
-                  child: Text(widget.instructions[index].text),
-                );
-              },
-                itemCount: widget.instructions.length,
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ListView.builder(
+                    scrollDirection: Axis.vertical,
+                    shrinkWrap: true,
+                    itemBuilder: (BuildContext context, int index) {
+                    return Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(widget.instructions[index].text),
+                      ),
+                    );
+                  },
+                    itemCount: widget.instructions.length,
+                  ),
+                ),
               ),
               FilledButton.tonal(
                   onPressed: () {
