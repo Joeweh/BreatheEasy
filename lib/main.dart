@@ -393,7 +393,6 @@ class _DirectionPageState extends State<DirectionPage> {
   void getRoute() async {
     polylineCoordinates.clear();
     polylines.clear();
-    List<LatLng> m = [];
     ApiCall a = ApiCall();
     List<RoutePrediction> r = await a.routeCall(startQuery.key, endQuery.key);
     

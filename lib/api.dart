@@ -77,7 +77,8 @@ class ApiCall {
     Map<String, dynamic> request = 
     {
         'origin': origin,
-        'dest': dest
+        'dest': dest,
+        'avoidOutliers': true,
     };
 
     final uri = Uri.parse("https://breathe-easy-server.onrender.com/api/routes");
