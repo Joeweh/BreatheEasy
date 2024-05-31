@@ -1,4 +1,5 @@
 import 'package:breathe_easy/utils.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -199,30 +200,74 @@ class _DirectionPageState extends State<DirectionPage> {
     }
   }
 
+  String formatEST(int est) {
+    int days = est ~/ (24 * 60);
+    int hours = (est % (24 * 60)) ~/ 60;
+    int minutes = est % 60;
+
+    if (days > 0) {
+      return "${days} days, ${hours} hours";
+    } else if (hours > 0) {
+      return "${hours} hours, ${minutes} mins";
+    } else {
+      return "${minutes} mins";
+    }
+  }
+
+Text formatAQ(double aq) {
+  if (aq > 0.8) {
+    return const Text(
+      'Good Air Quality',
+      style: TextStyle(
+        color: Colors.white,
+      ),
+    );
+  } else if (aq >= 0.5 && aq <= 0.8) {
+    return const Text(
+      'Above Average Air Quality',
+      style: TextStyle(
+        color: Colors.white,
+      ),
+    );
+  } else if (aq >= 0.25 && aq < 0.5) {
+    return const Text(
+      'Below Average Air Quality',
+      style: TextStyle(
+        color: Colors.orange,
+      ),
+    );
+  } else {
+    return const Text(
+      'Bad Air Quality',
+      style: TextStyle(
+        color: Colors.red,
+      ),
+    );
+  }
+}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(startQuery.value != "" && endQuery.value != ""
-            && routeDisplayed ? "EST:" + est.toString()
-            : ""),
+        iconTheme: IconThemeData(color: Colors.white),
+        title: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(startQuery.value != "" && endQuery.value != "" && routeDisplayed ?
+            "${formatEST(est)} (${miles.toStringAsFixed(1)} miles)" : "BreatheEasy", // Format est and miles
+            style: TextStyle(
+              color: Colors.white,
+            ),
+          ),
+        ),
         actions: [
-          Row(
-            children: [
-              Padding(
-                padding: EdgeInsets.all(10.0),
-                child: Text(startQuery.value != "" && endQuery.value != ""
-                    && routeDisplayed ? "AQ:" + aq.toString()
-                    : ""),
-              ),
-              Padding(
-                padding: EdgeInsets.all(10.0),
-                child: Text(startQuery.value != "" && endQuery.value != ""
-                    && routeDisplayed ? "MILES:" + miles.toString()
-                    : ""),
-              )
-            ],
-          )
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: startQuery.value != "" && endQuery.value != "" && routeDisplayed ? formatAQ(aq) : Placeholder(),
+            ),
+          ),
         ],
         centerTitle: true,
         backgroundColor: Color.fromARGB(255, 2, 110, 44),
