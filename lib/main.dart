@@ -48,6 +48,88 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
+class RoutePage extends StatefulWidget {
+  const RoutePage({
+    super.key,
+  });
+
+  @override
+  State<RoutePage> createState() => _RoutePageState();
+}
+
+class ListViewDirection extends StatefulWidget {  
+  // Example list of items
+  final List<String> items;
+
+    const ListViewDirection(
+      {super.key, required this.items});
+
+  @override
+  State<ListViewDirection> createState() => ListViewState();
+}
+
+class ListViewState extends State<ListViewDirection> {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        margin: const EdgeInsets.all(10),
+        child: Column(
+          children: [
+            for (String element in widget.items)
+              Container(
+                margin: EdgeInsets.symmetric(vertical: 10),
+                child: ListTile(
+                  title: Text(element),
+                  tileColor:
+                      Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+                ),
+              ),
+          ],
+        ));
+  }
+}
+
+class _RoutePageState extends State<RoutePage> {
+  List<String> items = [
+    'Item 1',
+    'Item 2',
+    'Item 3',
+    'Item 4',
+    'Item 5',
+    'Item 6',
+  ];
+  
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Directions"),
+        centerTitle: true,
+        backgroundColor: Color.fromARGB(255, 2, 110, 44),
+      ),
+      body: Container(
+        alignment: Alignment.bottomCenter,
+        margin: const EdgeInsets.all(10),
+        child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              ListViewDirection(items: items,),
+              FilledButton.tonal(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text("Exit")),
+            ]),
+      ),
+    );
+  }
+}
+
 class DirectionPage extends StatefulWidget {
   const DirectionPage({
     super.key,
@@ -231,7 +313,14 @@ class _DirectionPageState extends State<DirectionPage> {
                               )),
                               Expanded(
                                   child: FilledButton(
-                                      onPressed: () {},
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => RoutePage(),
+                                            fullscreenDialog: true),
+                                        );
+                                      },
                                       child: Text("Start Route"))),
                             ],
                           ),
@@ -255,6 +344,7 @@ class _DirectionPageState extends State<DirectionPage> {
       var txtController) {
     return TextField(
       controller: txtController,
+      readOnly: true,
       onTap: () {
         Navigator.push(
           context,
