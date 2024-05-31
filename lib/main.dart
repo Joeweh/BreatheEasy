@@ -441,6 +441,10 @@ class _DirectionPageState extends State<DirectionPage> {
       });
     }
 
+    if(startQuery != null && endQuery != null){
+      getRoute();
+    }
+
     final placeId = query.value;
     final url = Uri.parse('https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$api_key');
 
@@ -449,14 +453,13 @@ class _DirectionPageState extends State<DirectionPage> {
 
       if(response.statusCode == 200) {
         final place = json.decode(response.body)['result'];
-        final latlng = LatLng(place['geometry']['location']['lat'], place['geometry']['location']['lng']);
         final markerId = isStart ? 'start_marker' : 'end_marker';
 
         setState(() {
           if(isStart) {
-            _startMarker = Marker(markerId: MarkerId(markerId), position: latlng);
+            _startMarker = Marker(markerId: MarkerId(markerId), position: polylineCoordinates.first);
           } else {
-            _endMarker = Marker(markerId: MarkerId(markerId), position: latlng);
+            _endMarker = Marker(markerId: MarkerId(markerId), position: polylineCoordinates.last);
           }
 
           if(_startMarker != null && _endMarker != null) {
@@ -483,6 +486,7 @@ class _DirectionPageState extends State<DirectionPage> {
   void getRoute() async {
     polylineCoordinates.clear();
     polylines.clear();
+    List<LatLng> m = [];
     ApiCall a = ApiCall();
     List<RoutePrediction> r = await a.routeCall(startQuery.key, endQuery.key);
     
