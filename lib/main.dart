@@ -20,6 +20,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
@@ -210,7 +211,7 @@ class _DirectionPageState extends State<DirectionPage> {
     if (days > 0) {
       return "${days} days, ${hours} hours";
     } else if (hours > 0) {
-      return "${hours} hours, ${minutes} mins";
+      return "${hours} hrs, ${minutes} mins";
     } else {
       return "${minutes} mins";
     }
@@ -421,25 +422,27 @@ Text formatAQ(double aq) {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Chip(
-                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 2.5),
                     avatar: const Icon(Icons.schedule),
                     label: Text(formatEST(est)),
                   ),
                   const SizedBox(width: 5.0),
                   Chip(
-                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 2.5),
                     avatar: const Icon(Icons.airline_stops),
-                    label: Text(miles.toStringAsFixed(1)),
+                    label: Text(
+                      '${miles.toStringAsFixed(1)} mi'
+                      ),
                   ),
                   const SizedBox(width: 5.0),
                   Chip(
-                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 2.5),
                     avatar: const Icon(Icons.leaderboard),
                     label: Text('#${curRoute + 1}'),
                   ),
                   const SizedBox(width: 5.0),
                   Chip(
-                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 2.5),
                     avatar: Icon(
                       Icons.masks,
                       color: getMaskColor(),
