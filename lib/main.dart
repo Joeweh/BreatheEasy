@@ -105,6 +105,13 @@ class _RoutePageState extends State<RoutePage> {
   }
 }
 
+class DirectionPage extends StatefulWidget {
+  const DirectionPage({super.key});
+
+  @override
+  State<DirectionPage> createState() => _DirectionPageState();
+}
+
 class _DirectionPageState extends State<DirectionPage> {
   double aq = 0;
   double miles = 0;

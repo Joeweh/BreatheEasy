@@ -50,6 +50,7 @@ dependencies:
   google_places_flutter: ^2.0.8
   flutter_google_places_sdk: ^0.3.9
   latlong2: ^0.9.1
+  flutter_polyline_points: ^2.0.0
 
 dev_dependencies:
   flutter_test:
