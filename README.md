@@ -41,12 +41,15 @@ An air quality map application that provides routes ranked on air quality for wa
 1. Click on the Text Fields below the Map to enter the autocomplete page
 
 ![alt text](https://raw.githubusercontent.com/Joeweh/BreatheEasy/basiclayout/assets/text-field-image-6-1-2024.png)
+
 2. Click on a suggested address to return to the map page
 
 ![alt text](https://github.com/Joeweh/BreatheEasy/blob/basiclayout/assets/autocomplete-image-6-1-2024.png?raw=true)
+
 3. After two addresses are selected, use slider to select route
 
 ![alt text](https://raw.githubusercontent.com/Joeweh/BreatheEasy/basiclayout/assets/routes-image-6-1-2024.png)
+
 4. Click start route to get directions
 
 ![alt text](https://raw.githubusercontent.com/Joeweh/BreatheEasy/basiclayout/assets/directions-image-6-1-2024.png)
