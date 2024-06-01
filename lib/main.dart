@@ -112,7 +112,7 @@ class DirectionPage extends StatefulWidget {
 
 class _DirectionPageState extends State<DirectionPage> {
   double aq = 0;
-  int miles = 0;
+  double miles = 0;
 
   // in minutes
   int est = 0;
@@ -159,11 +159,11 @@ class _DirectionPageState extends State<DirectionPage> {
     return aq;
   }
 
-  void setMiles(int x) {
+  void setMiles(double x) {
     miles = x;
   }
 
-  int getMiles() {
+  double getMiles() {
     return miles;
   }
 
@@ -216,31 +216,43 @@ class _DirectionPageState extends State<DirectionPage> {
     }
   }
 
+  Color getMaskColor() {
+    if (aq <= 1.0) {
+      return Color.fromARGB(255, 2, 110, 44);
+    } else if (aq < 3.0) {
+      return Color.fromARGB(255, 2, 110, 44);
+    } else if (aq < 5.0) {
+      return Colors.orange;
+    } else {
+      return Colors.red;
+    }
+  }
+
 Text formatAQ(double aq) {
   if (aq <= 1.0) {
     return const Text(
-      'Great Air Quality',
+      'Great',
       style: TextStyle(
-        color: Colors.white,
+        color: Colors.black,
       ),
     );
   } else if (aq < 3.0) {
     return const Text(
-      'Good Air Quality',
+      'Good',
       style: TextStyle(
-        color: Colors.white,
+        color: Colors.black,
       ),
     );
   } else if (aq < 5.0) {
     return const Text(
-      'Bad Air Quality',
+      'Bad',
       style: TextStyle(
         color: Colors.orange,
       ),
     );
   } else {
     return const Text(
-      'Terrible Air Quality',
+      'Terrible',
       style: TextStyle(
         color: Colors.red,
       ),
@@ -251,29 +263,6 @@ Text formatAQ(double aq) {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.white),
-        title: FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Text(startQuery.value != "" && endQuery.value != "" && routeDisplayed ?
-            "${formatEST(est)} (${miles.toStringAsFixed(1)} miles)" : "BreatheEasy", // Format est and miles
-            style: TextStyle(
-              color: Colors.white,
-            ),
-          ),
-        ),
-        actions: [
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: startQuery.value != "" && endQuery.value != "" && routeDisplayed ? formatAQ(aq) : Placeholder(),
-            ),
-          ),
-        ],
-        centerTitle: true,
-        backgroundColor: Color.fromARGB(255, 2, 110, 44),
-      ),
       body: Container(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.end,
@@ -317,8 +306,7 @@ Text formatAQ(double aq) {
                                         .durationMinutes
                                         .truncate());
                                     setMiles(routes[curRoute]
-                                        .distanceMiles
-                                        .truncate());
+                                        .distanceMiles);
                                     setAQ(routes[curRoute].airScore);
                                     curRoute = value.truncate();
                                     polylineCoordinates.clear();
@@ -411,18 +399,58 @@ Text formatAQ(double aq) {
     }
 
     return Container(
-        child: GoogleMap(
-      onMapCreated: _onMapCreated,
-      initialCameraPosition: CameraPosition(
-        target: _center,
-        zoom: 11.0,
-      ),
-      markers: {
-        if (_startMarker != null) _startMarker!,
-        if (_endMarker != null) _endMarker!,
-      },
-      polylines: Set<Polyline>.of(polylines.values),
-    ));
+        child: Stack(
+          alignment: Alignment.topCenter,
+          children: [
+            GoogleMap(
+              onMapCreated: _onMapCreated,
+              initialCameraPosition: CameraPosition(
+                target: _center,
+                zoom: 11.0,
+              ),
+              markers: {
+                if (_startMarker != null) _startMarker!,
+                if (_endMarker != null) _endMarker!,
+              },
+              polylines: Set<Polyline>.of(polylines.values),
+            ),
+            startQuery.value != "" && endQuery.value != "" && routeDisplayed ? Container(
+              margin: const EdgeInsets.only(top: 10.0),
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Chip(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                    avatar: const Icon(Icons.schedule),
+                    label: Text(formatEST(est)),
+                  ),
+                  const SizedBox(width: 5.0),
+                  Chip(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                    avatar: const Icon(Icons.airline_stops),
+                    label: Text(miles.toStringAsFixed(1)),
+                  ),
+                  const SizedBox(width: 5.0),
+                  Chip(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                    avatar: const Icon(Icons.leaderboard),
+                    label: Text('#${curRoute + 1}'),
+                  ),
+                  const SizedBox(width: 5.0),
+                  Chip(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                    avatar: Icon(
+                      Icons.masks,
+                      color: getMaskColor(),
+                    ),
+                    label: formatAQ(aq),
+                  ),
+                ],
+              ),
+            ) : const SizedBox(),
+          ]
+        ));
   }
 
   void askForLocation() async {
@@ -479,14 +507,14 @@ Text formatAQ(double aq) {
 
     setNumRoutes(routes.length);
     setEst(routes[curRoute].durationMinutes.truncate());
-    setMiles(routes[curRoute].distanceMiles.truncate());
+    setMiles(routes[curRoute].distanceMiles);
     setAQ(routes[curRoute].airScore);
 
     setState(() {});
     routes[curRoute].points.forEach((LatLng point) {
       polylineCoordinates.add(LatLng(point.latitude, point.longitude));
     });
-    
+
     _startMarker = Marker(markerId: MarkerId('start'), position: polylineCoordinates.first);
     _endMarker = Marker(markerId: MarkerId('end'), position: polylineCoordinates.last);
 
