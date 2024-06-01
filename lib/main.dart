@@ -36,6 +36,12 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
+  final String title;
+
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
 class _MyHomePageState extends State<MyHomePage> {
   var selectedIndex = 0;
 
@@ -97,11 +103,6 @@ class _RoutePageState extends State<RoutePage> {
       ),
     );
   }
-}
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _DirectionPageState extends State<DirectionPage> {
@@ -556,11 +557,6 @@ class LocationBarState extends State<LocationBar> {
         },
         autofocus: true,
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
