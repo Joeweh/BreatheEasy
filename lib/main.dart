@@ -1,8 +1,10 @@
 import 'package:breathe_easy/utils.dart';
 import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:breathe_easy/api.dart';
@@ -33,11 +35,6 @@ class MyApp extends StatelessWidget {
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
 
 class _MyHomePageState extends State<MyHomePage> {
   var selectedIndex = 0;
@@ -101,14 +98,10 @@ class _RoutePageState extends State<RoutePage> {
     );
   }
 }
-
-class DirectionPage extends StatefulWidget {
-  const DirectionPage({
-    super.key,
-  });
+  final String title;
 
   @override
-  State<DirectionPage> createState() => _DirectionPageState();
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _DirectionPageState extends State<DirectionPage> {
@@ -563,6 +556,11 @@ class LocationBarState extends State<LocationBar> {
         },
         autofocus: true,
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _incrementCounter,
+        tooltip: 'Increment',
+        child: const Icon(Icons.add),
+      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
